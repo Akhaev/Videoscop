@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
 from config import PostgresConfig
-
-def new_session_maker(psql_config: PostgresConfig) -> async_sessionmaker[AsyncSession]:
+from . import models
+async def new_session_maker(psql_config: PostgresConfig) -> async_sessionmaker[AsyncSession]:
     database_uri = "postgresql+psycopg://{login}:{password}@{host}:{port}/{database}".format(
         login=psql_config.login,
         password=psql_config.password,
@@ -19,4 +19,8 @@ def new_session_maker(psql_config: PostgresConfig) -> async_sessionmaker[AsyncSe
             "connect_timeout": 5,
         },
     )
+    
+    async with engine.begin() as conn:
+        await conn.run_sync(models.Base.metadata.create_all)
+    
     return async_sessionmaker(engine, class_=AsyncSession, autoflush=False, expire_on_commit=False)

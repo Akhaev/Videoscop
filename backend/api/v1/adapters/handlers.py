@@ -1,9 +1,13 @@
 from fastapi import APIRouter
-from sqlalchemy.ext.asyncio import AsyncSession
 from dishka.integrations.fastapi import inject, FromDishka
-router = APIRouter()
-@router.get('/api/test')
+from application.interactors import CreateUserInteractor
+from .schemas import CreateUser
+from application import dto
+router = APIRouter(prefix='/users')
+
+
+@router.post('')
 @inject
-def test(session: FromDishka[AsyncSession]) -> str:
-    
-    return {'message': 's'}
+async def create_user(user: CreateUser, interactor: FromDishka[CreateUserInteractor]) -> CreateUser:
+    result = await interactor(dto.CreateUserDTO(**user.model_dump()))
+    return result

@@ -1,11 +1,17 @@
 from abc import abstractmethod  
 from typing import Protocol
 from domen import entities
-
+from uuid import UUID
     
 class UserCreater(Protocol):
     @abstractmethod
-    def create_user(self, user: entities.User ) -> None:
+    def create(self, user: entities.User ) -> None:
+        pass
+    
+class CreateUserValidator(Protocol):
+
+    @abstractmethod
+    def validate(self, user: entities.User) -> set[bool, str]:
         pass
     
 class DBSession(Protocol):
@@ -13,3 +19,9 @@ class DBSession(Protocol):
     @abstractmethod
     def commit(self) -> None:
         pass
+    
+
+class UUIDGenerator(Protocol):
+    def __call__(self) -> UUID:
+        ...
+    

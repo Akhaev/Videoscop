@@ -4,11 +4,11 @@ from pydantic import Field, BaseModel
 
 
 class PostgresConfig(BaseModel):
-    host: str = Field(alias='POSTGRES_HOST')
-    port: int = Field(alias='POSTGRES_PORT')
-    login: str = Field(alias='POSTGRES_USER')
-    password: str = Field(alias='POSTGRES_PASSWORD')
-    database: str = Field(alias='POSTGRES_DB')
+    host: str = Field(alias='POSTGRES_HOST', default='127.0.0.1')
+    port: int = Field(alias='POSTGRES_PORT', default='5432')
+    login: str = Field(alias='POSTGRES_USER', default='postgres')
+    password: str = Field(alias='POSTGRES_PASSWORD', default='password')
+    database: str = Field(alias='POSTGRES_DB', default='postgres')
 
 class FastApiConfig(BaseModel):
     pass

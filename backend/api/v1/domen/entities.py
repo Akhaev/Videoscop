@@ -3,12 +3,11 @@ from datetime import datetime
 
 @dataclass(slots=True)
 class User:
-    uuid: int
     login: str
     name: str
     email: str
     password: str
-    
+    uuid: int | None = None
 @dataclass(slots=True)    
 class Video:
     uuid: int
