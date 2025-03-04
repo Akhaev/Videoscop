@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from config import PostgresConfig
 from . import models
 async def new_session_maker(psql_config: PostgresConfig) -> async_sessionmaker[AsyncSession]:
-    database_uri = "postgresql+psycopg://{login}:{password}@{host}:{port}/{database}".format(
+    database_uri = "postgresql+asyncpg://{login}:{password}@{host}:{port}/{database}".format(
         login=psql_config.login,
         password=psql_config.password,
         host=psql_config.host,
@@ -15,9 +15,6 @@ async def new_session_maker(psql_config: PostgresConfig) -> async_sessionmaker[A
         database_uri,
         pool_size=15,
         max_overflow=15,
-        connect_args={
-            "connect_timeout": 5,
-        },
     )
     
     async with engine.begin() as conn:

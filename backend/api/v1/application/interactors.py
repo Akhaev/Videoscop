@@ -16,7 +16,11 @@ class CreateUserInteractor():
     async def __call__(self, user: dto.CreateUserDTO) -> entities.User:
         uuid = str(self.uuid_generator())
         
-        self.user_validator.validate(user)
+        message = self.user_validator.validate(user)
+        
+        if message:
+            raise ValueError(message)
+        
         user_entity = entities.User(
             uuid = uuid,
             login=user.login,
@@ -24,7 +28,12 @@ class CreateUserInteractor():
             email=user.email,
             password=user.password
         )
-        await self.user_repository.create(user_entity)
+        
+        try:
+            await self.user_repository.create(user_entity)
+        except Exception as e:
+            raise Exception(f"Error creating user: {str(e)}")
+        
         await self.db_session.commit()
         
         return user_entity

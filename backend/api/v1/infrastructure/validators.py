@@ -11,7 +11,7 @@ class UserValidator(CreateUserValidator):
 
 
     def validate(self, user):
-        CreateUser(
+            CreateUser(
             login=user.login,
             name=user.name,
             email=user.email,
