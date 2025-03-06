@@ -6,15 +6,15 @@ from dishka import make_async_container
 from ioc import FastApiApp
 from config import Config
 from pydantic import ValidationError
-from adapters import exceptions
+from adapters import exceptions_handlers
 config = Config()
-print(config)
+
 container = make_async_container(FastApiApp(), FastapiProvider(), context={Config: config})
 def get_fastapi_app() -> FastAPI:
 
     app = FastAPI()
 
-    for exc_type, handler in exceptions.all_exceptions.items():
+    for exc_type, handler in exceptions_handlers.all_handlers.items():
         app.add_exception_handler(exc_type, handler)
         
     app.include_router(handlers.router)
@@ -22,7 +22,6 @@ def get_fastapi_app() -> FastAPI:
     return app
 
 def get_app(config: Config) -> FastAPI:
-    print(config)
     fastapi = get_fastapi_app()
     
     return fastapi

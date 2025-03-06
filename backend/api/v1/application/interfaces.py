@@ -11,7 +11,7 @@ class UserCreater(Protocol):
 class CreateUserValidator(Protocol):
 
     @abstractmethod
-    def validate(self, user: entities.User) -> set[bool, str]:
+    def validate(self, user: entities.User) -> None:
         pass
     
 class DBSession(Protocol):
