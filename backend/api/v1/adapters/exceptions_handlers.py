@@ -5,20 +5,30 @@ from asyncpg.exceptions import UniqueViolationError
 from fastapi import status
 import json
 async def validation_exception_handler(request: Request, exc: ValidationError) -> JSONResponse:
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content={"message": f"{exc.errors()}"},
-    )
-    
-async def integrity_error_handler(request: Request, exc: UniqueViolationError) -> JSONResponse:
-    exists_fields = exc.args[0]
+    problem_fields = {error["loc"][-1]: error["msg"] for error in exc.errors()}
     
     error_message = {
-            "message": "fields already exists",
-            "problem_fields": exists_fields
-        }
+        "message": "incorrect field/fields",
+        "problem_fields": problem_fields
+    }
     
-    return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=json.dumps(error_message))
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=json.dumps(error_message)
+    )
+
+async def integrity_error_handler(request: Request, exc: UniqueViolationError) -> JSONResponse:
+    problem_fields = {field: "already exists" for field in exc.args[0]}
+    
+    error_message = {
+        "message": "incorrect field/fields",
+        "problem_fields": problem_fields
+    }
+    
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content=json.dumps(error_message)
+    )
         
 all_handlers = {
     ValidationError: validation_exception_handler,  

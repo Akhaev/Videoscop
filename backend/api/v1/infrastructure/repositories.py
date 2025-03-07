@@ -19,7 +19,7 @@ class UserRepository(interfaces.UserCreater):
         query = select(models.User).where(column == value).exists()
         exists = await self.session.scalar(select(query))
         if exists:
-            raise UniqueViolationError([column])
+            raise UniqueViolationError([column.name])
     
     async def _exists_by_columns(self, columns: list[Column], values: list[Any]) -> None:
         exists_fields = []
@@ -27,7 +27,7 @@ class UserRepository(interfaces.UserCreater):
             query = select(models.User).where(column == value).exists()
             exists = await self.session.scalar(select(query))
             if exists:
-                exists_fields.append(column)
+                exists_fields.append(column.name)
         if exists:                
             raise UniqueViolationError(exists_fields)
         
