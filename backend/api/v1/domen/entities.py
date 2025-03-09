@@ -32,3 +32,10 @@ class Session:
     start_time: datetime.date
     end_time: datetime.date 
     
+
+@dataclass(slots=True)
+class UserToken:
+    uuid: int
+    user: User
+    token: str
+    

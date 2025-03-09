@@ -13,6 +13,11 @@ class PostgresConfig(BaseModel):
 class FastApiConfig(BaseModel):
     pass
 
+class JWTConfig(BaseModel):
+    secret_key: str = Field(default='default')
+    expiration_days: int = Field(default=30)
+
 class Config(BaseModel):
     postgres: PostgresConfig = Field(default_factory=lambda: PostgresConfig(**env))
     fastapi: FastApiConfig = Field(default_factory=lambda: FastApiConfig(**env))
+    jwtconfig: JWTConfig = Field(default_factory=lambda: JWTConfig(**env))
