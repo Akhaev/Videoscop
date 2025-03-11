@@ -5,7 +5,7 @@ from asyncpg.exceptions import UniqueViolationError
 from fastapi import status
 import json
 import jwt
-from infrastructure.auth.exceptions import UnAuthorizedError
+from application.exceptions import UnAuthorizedError
 async def validation_exception_handler(request: Request, exc: ValidationError) -> JSONResponse:
     problem_fields = {error["loc"][-1]: error["msg"] for error in exc.errors()}
     

@@ -4,7 +4,10 @@ from domen import entities
 from uuid import UUID
 from typing import NewType
 
+
 Token = NewType('Token', str)
+
+
 
 class UserCreater(Protocol):
     @abstractmethod
@@ -28,8 +31,28 @@ class UUIDGenerator(Protocol):
     def __call__(self) -> UUID:
         ...
 
-class AuthAdd(Protocol):
+class AuthAdder(Protocol):
     @abstractmethod
     async def add(self, user_id: str) -> Token:
         pass
 
+class AuthCurrentUserGetter(Protocol):
+    
+    @abstractmethod
+    async def get_current_user(self) -> str | None:
+        pass
+
+class UserUpdater(Protocol):
+    @abstractmethod
+    def update(self, user_id: str, fields: dict[str:str] ) -> None:
+        pass
+    
+    @abstractmethod
+    def get_by_id(self, user_id) -> entities.User:
+        pass
+    
+class UserUpdateValidator(Protocol):
+    
+    @abstractmethod
+    def validate(self, fields: dict[str:str]) -> None:
+        pass

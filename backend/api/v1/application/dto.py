@@ -9,6 +9,9 @@ class CreateUserDTO:
     email: str
     password: str
     
-    
-    
-    
+@dataclass(slots=True)
+class UpdateUserDto:
+    login: str
+    name: str
+    email: str
+    password: str
