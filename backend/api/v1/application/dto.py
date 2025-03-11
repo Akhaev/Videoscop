@@ -11,7 +11,7 @@ class CreateUserDTO:
     
 @dataclass(slots=True)
 class UpdateUserDto:
-    login: str
-    name: str
-    email: str
-    password: str
+    login: str | None
+    name: str | None
+    email: str | None
+    password: str | None

@@ -47,11 +47,8 @@ class UserUpdater(Protocol):
     def update(self, user_id: str, fields: dict[str:str] ) -> None:
         pass
     
-    @abstractmethod
-    def get_by_id(self, user_id) -> entities.User:
-        pass
     
-class UserUpdateValidator(Protocol):
+class UpdateUserValidator(Protocol):
     
     @abstractmethod
     def validate(self, fields: dict[str:str]) -> None:

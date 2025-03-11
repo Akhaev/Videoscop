@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import exists, select
+from sqlalchemy import select
 from application import interfaces
 from domen import entities
 from . import models
@@ -7,11 +7,13 @@ from asyncpg import UniqueViolationError
 import hashlib
 from sqlalchemy import Column
 from typing import Any
+from . import exceptions
+
 def Sha512Hash(password: str) -> str:
     hashed_password = hashlib.sha512(password.encode('utf-8')).hexdigest()
     return hashed_password
 
-class UserRepository(interfaces.UserCreater):
+class UserRepository(interfaces.UserCreater, interfaces.UserUpdater):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         
@@ -31,6 +33,9 @@ class UserRepository(interfaces.UserCreater):
         if exists:                
             raise UniqueViolationError(exists_fields)
         
+    async def get_by_id(self, user_id: str) -> entities.User | None:
+        user = await self.session.get(models.User, user_id)
+        return user
         
     
     async def create(self, user: entities.User) -> None:
@@ -45,3 +50,9 @@ class UserRepository(interfaces.UserCreater):
         
     
 
+    async def update (self, user_id: str, update_fields: dict[str:str]) -> None:
+        user = await self.session.get(models.User, user_id)
+        if user is None:
+            raise exceptions.RecordDontExistsError('User not found')
+        user.update(update_fields)
+            

@@ -2,22 +2,22 @@ from . import interfaces
 from . import dto
 from domen import entities
 from . import exceptions
-
+from dataclasses import asdict
 class CreateUserInteractor():
-    def __init__(self, user_repository: interfaces.UserCreater, 
+    def __init__(self, repository: interfaces.UserCreater, 
                  db_session: interfaces.DBSession, 
                  uuid_generator: interfaces.UUIDGenerator,
-                 user_validator: interfaces.CreateUserValidator,
+                 validator: interfaces.CreateUserValidator,
                  auth: interfaces.AuthAdder) -> None:
         
-        self.user_repository = user_repository
+        self.user_repository = repository
         self.db_session = db_session
         self.uuid_generator = uuid_generator
-        self.user_validator = user_validator
+        self.validator = validator
         self.auth = auth
     async def __call__(self, user: dto.CreateUserDTO) -> interfaces.Token:
         
-        self.user_validator.validate(user)
+        self.validator.validate(user)
         uuid = str(self.uuid_generator())
         
         user_entity = entities.User(
@@ -28,7 +28,7 @@ class CreateUserInteractor():
             password=user.password
         )
         
-        await self.user_repository.create(user_entity)
+        await self.repository.create(user_entity)
         
 
         
@@ -39,11 +39,11 @@ class CreateUserInteractor():
 class UpdateUserInteractor():
     
     def __init__(self,
-                 user_repository: interfaces.UserUpdater,  
+                 repository: interfaces.UserUpdater,  
                  validator: interfaces.UserUpdateValidator,
                  auth: interfaces.AuthCurrentUserGetter) -> None:
         
-        self.user_repository = user_repository
+        self.repository = repository
         self.validator = validator
         self.auth = auth
     
@@ -53,7 +53,16 @@ class UpdateUserInteractor():
         if user_id is None:
             raise exceptions.UnauthorizedError()
         
-        if current_password is None and fields['email'] is not None or fields['password'] is not None:
-            raise exceptions.UnAuthorizedError()
+        if current_password is None and (fields.email is not None or fields.password is not None):
+            raise ValueError('Requires an up-to-date password to update password or email')
         
-        self.validator()
+        self.validator.validate(fields)
+        
+        update_fields = {key: value for key, value in zip(asdict(fields).keys(), asdict(fields).values()) if value is not None}
+        
+        self.repository.update_user(user_id, update_fields)
+        
+        self.commit()
+        
+        
+        

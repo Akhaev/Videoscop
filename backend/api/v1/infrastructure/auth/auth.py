@@ -4,16 +4,17 @@ from fastapi import Request
 from config import JWTConfig    
 import jwt
 from datetime import datetime, timedelta, timezone
-from . import exceptions 
+
  
-now = datetime.now(timezone.utc) + timedelta(hours=3)
+
 
  
 class Auth(interfaces.AuthAdd):
-    def __init__(self, request: Request, config: JWTConfig) -> str:
+    def __init__(self, request: Request, config: JWTConfig) -> None:
         self.request = request
         self.config = config
     def add(self, user_id: str) -> interfaces.Token:
+        now = datetime.now(timezone.utc)
         payload = {
             "sub": user_id,
             "exp": now + timedelta(days=self.config.expiration_days),

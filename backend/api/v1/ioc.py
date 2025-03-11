@@ -5,9 +5,9 @@ from infrastructure.db.database import new_session_maker
 from typing import AsyncIterable
 from application import interfaces
 from infrastructure.db.repositories import UserRepository
-from application.interactors import CreateUserInteractor
+from application.interactors import CreateUserInteractor, UpdateUserInteractor
 from uuid import uuid4
-from infrastructure import validators
+from application import validators
 from infrastructure.auth import auth
 
 class FastApiApp(Provider):
@@ -34,10 +34,14 @@ class FastApiApp(Provider):
     def get_uuid_generator(self) -> interfaces.UUIDGenerator:
         return uuid4
     
-    create_user_validator = provide(validators.UserValidator, scope=Scope.APP, provides=AnyOf[interfaces.CreateUserValidator])
+    create_user_validator = provide(validators.CreateUserValidator, scope=Scope.APP, provides=AnyOf[interfaces.CreateUserValidator])
     
     create_user_authAdd = provide(auth.Auth, scope=Scope.REQUEST, provides=AnyOf[interfaces.AuthAdd])
     
     create_user_interactor = provide(CreateUserInteractor, scope=Scope.REQUEST)
     
+    update_user_validator = provide(validators.UpdateUserValidator, scope=Scope.APP, provides=AnyOf[interfaces.UpdateUserValidator])
     
+    update_user_authCurrentUserGetter = provide(auth.Auth, scope=Scope.REQUEST, provides=AnyOf[interfaces.AuthCurrentUserGetter])
+    
+    update_user_interactor = provide(UpdateUserInteractor, scope=Scope.REQUEST)
