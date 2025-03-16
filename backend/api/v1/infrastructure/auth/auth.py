@@ -6,10 +6,7 @@ import jwt
 from datetime import datetime, timedelta, timezone
 
  
-
-
- 
-class Auth(interfaces.AuthAdd):
+class Auth(interfaces.AuthCurrentUserGetter, interfaces.AuthAdder):
     def __init__(self, request: Request, config: JWTConfig) -> None:
         self.request = request
         self.config = config
@@ -24,7 +21,7 @@ class Auth(interfaces.AuthAdd):
 
         token = jwt.encode(payload, self.config.secret_key, algorithm="HS256")
         return token
-    def current_user(self) -> str | None:
+    def get_current_user(self) -> str | None:
 
         auth_header = self.request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):

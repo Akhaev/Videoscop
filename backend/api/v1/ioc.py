@@ -4,8 +4,8 @@ from config import Config, JWTConfig
 from infrastructure.db.database import new_session_maker
 from typing import AsyncIterable
 from application import interfaces
-from infrastructure.db.repositories import UserRepository
-from application.interactors import CreateUserInteractor, UpdateUserInteractor
+from infrastructure.db.repositories import UserRepository, VideoRepository
+from application.interactors import CreateUserInteractor, UpdateUserInteractor, GetUserInteractor, DeleteUserInteractor, SearchUserVideoInteractor
 from uuid import uuid4
 from application import validators
 from infrastructure.auth import auth
@@ -28,7 +28,7 @@ class FastApiApp(Provider):
         async with async_sessionmaker() as session:
             yield session
             
-    user_repository = provide(UserRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserCreater])
+    user_repository = provide(UserRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserCreater, interfaces.UserUpdater, interfaces.UserGetter, interfaces.UserDeletter])
     
     @provide(scope=Scope.APP)
     def get_uuid_generator(self) -> interfaces.UUIDGenerator:
@@ -36,7 +36,7 @@ class FastApiApp(Provider):
     
     create_user_validator = provide(validators.CreateUserValidator, scope=Scope.APP, provides=AnyOf[interfaces.CreateUserValidator])
     
-    create_user_authAdd = provide(auth.Auth, scope=Scope.REQUEST, provides=AnyOf[interfaces.AuthAdd])
+    create_user_authAdd = provide(auth.Auth, scope=Scope.REQUEST, provides=AnyOf[interfaces.AuthAdder])
     
     create_user_interactor = provide(CreateUserInteractor, scope=Scope.REQUEST)
     
@@ -45,3 +45,11 @@ class FastApiApp(Provider):
     update_user_authCurrentUserGetter = provide(auth.Auth, scope=Scope.REQUEST, provides=AnyOf[interfaces.AuthCurrentUserGetter])
     
     update_user_interactor = provide(UpdateUserInteractor, scope=Scope.REQUEST)
+    
+    get_user_interactor = provide(GetUserInteractor, scope=Scope.REQUEST)
+    
+    delete_user_interactor = provide(DeleteUserInteractor, scope=Scope.REQUEST)
+    
+    video_repository = provide(VideoRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserVideoSearcher])
+    
+    search_user_video_interactor = provide(SearchUserVideoInteractor, scope=Scope.REQUEST)

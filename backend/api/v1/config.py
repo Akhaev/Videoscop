@@ -2,7 +2,6 @@ from os import environ as env
 
 from pydantic import Field, BaseModel
 
-
 class PostgresConfig(BaseModel):
     host: str = Field(alias='POSTGRES_HOST', default='127.0.0.1')
     port: int = Field(alias='POSTGRES_PORT', default='5432')

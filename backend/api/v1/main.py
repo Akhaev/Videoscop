@@ -1,11 +1,10 @@
 import config
 from fastapi import FastAPI
-from adapters import handlers
+from adapters.handlers import user, video
 from dishka.integrations.fastapi import setup_dishka, FastapiProvider
 from dishka import make_async_container
 from ioc import FastApiApp
 from config import Config
-from pydantic import ValidationError
 from adapters import exceptions_handlers
 config = Config()
 
@@ -17,7 +16,7 @@ def get_fastapi_app() -> FastAPI:
     for exc_type, handler in exceptions_handlers.all_handlers.items():
         app.add_exception_handler(exc_type, handler)
         
-    app.include_router(handlers.router)
+    app.include_router(user.router, video.router)
     setup_dishka(container, app)
     return app
 

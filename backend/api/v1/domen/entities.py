@@ -5,7 +5,6 @@ from datetime import datetime
 class User:
     uuid: int
     login: str
-    name: str
     email: str
     password: str
     
@@ -15,8 +14,8 @@ class Video:
     name: str
     author: User
     length_seconds: int
-    format_: str
     size: str
+    uploaded_at: datetime.date
     
 @dataclass(slots=True)
 class HeatMap:
@@ -24,18 +23,7 @@ class HeatMap:
     video: Video
     heat_map_data: dict
     
-@dataclass(slots=True)
-class Session:
-    uuid: int
-    user: User
-    video: Video
-    start_time: datetime.date
-    end_time: datetime.date 
-    
 
-@dataclass(slots=True)
-class UserToken:
-    uuid: int
-    user: User
-    token: str
+
+
     

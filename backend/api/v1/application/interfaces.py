@@ -53,3 +53,21 @@ class UpdateUserValidator(Protocol):
     @abstractmethod
     def validate(self, fields: dict[str:str]) -> None:
         pass
+
+class UserGetter(Protocol):
+    
+    @abstractmethod
+    def get(self, user_id: str) -> entities.User:
+        pass
+
+class UserDeletter(Protocol):
+
+    @abstractmethod
+    def delete(self, user_id: str) -> None:
+        pass
+    
+class UserVideoSearcher(Protocol):
+    
+    @abstractmethod
+    def search(self, user_id: str) -> list[entities.Video] | None:
+        pass
