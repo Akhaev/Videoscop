@@ -3,7 +3,7 @@ from typing import Protocol
 from domen import entities
 from uuid import UUID
 from typing import NewType
-
+import datetime
 
 Token = NewType('Token', str)
 
@@ -69,5 +69,10 @@ class UserDeletter(Protocol):
 class UserVideoSearcher(Protocol):
     
     @abstractmethod
-    def search(self, user_id: str) -> list[entities.Video] | None:
+    def search(self, user_id: str, date: datetime.date | None) -> list[entities.Video] | None:
+        pass
+
+class SearchUserVideosValidator(Protocol):
+    @abstractmethod
+    def validate(self, date: datetime.date | None) -> None:
         pass

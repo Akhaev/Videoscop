@@ -103,19 +103,23 @@ class DeleteUserInteractor:
         
         await self.db_session.commit()
 
-class SearchUserVideoInteractor:
+class SearchUserVideosInteractor:
     def __init__(self, repository: interfaces.UserVideoSearcher, 
                  auth: interfaces.AuthCurrentUserGetter,
-                 db_session: interfaces.DBSession) -> None:
+                 db_session: interfaces.DBSession,
+                 validator: interfaces.SearchUserVideosValidator) -> None:
         self.repository = repository
         self.auth = auth
         self.db_session = db_session
+        self.validator = validator
     
-    def __call__(self, date: datetime.date) -> list[entities.Video] | None:
+    def __call__(self, date: datetime.date | None) -> list[entities.Video] | None:
         user_id = self.auth.get_current_user()
         
         if user_id is None:
             raise exceptions.UnauthorizedError()
+        
+        self.validator.validate(date)
         
         videos = self.repository.search_by_date(user_id, date)
         

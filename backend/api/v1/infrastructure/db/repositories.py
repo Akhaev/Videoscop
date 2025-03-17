@@ -73,7 +73,7 @@ class VideoRepository(interfaces.UserVideoSearcher):
                              length_seconds=video.length_seconds, size=video.size)
         self.session.add(video)
 
-    async def search(self, user_id: str, date: datetime.date) -> list[entities.Video] | None:
+    async def search(self, user_id: str, date: datetime.date | None) -> list[entities.Video] | None:
         videos = await self.session.execute(select(models.Video).where(models.Video.author_uuid == user_id, models.Video.uploaded_at == date).order_by(models.Video.name))
         return [entities.Video(uuid=video.uuid, name=video.name, author=video.author, 
                                length_seconds=video.length_seconds, size=video.size, uploaded_at=video.uploaded_at) for video in videos]

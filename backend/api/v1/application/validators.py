@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 import re
+import datetime
 from .exceptions import ValidationError
-from .interfaces import CreateUserValidator, UpdateUserValidator
+from .interfaces import CreateUserValidator, UpdateUserValidator, SearchUserVideosValidator
 from . import dto
 @dataclass
 class CreateUser:
@@ -86,3 +87,8 @@ class UpdateUserValidator(CreateUserValidator):
             )
         except ValidationError as e:
             raise e
+
+class DateValidator(SearchUserVideosValidator):
+    def validate(self, date: datetime.date | None) -> None:
+        if date is not None and not isinstance(date, datetime.date):
+            raise ValidationError([{"loc": ("date",), "msg": "Invalid date format", "type": "value_error"}])

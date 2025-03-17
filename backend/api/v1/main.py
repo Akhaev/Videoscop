@@ -16,7 +16,8 @@ def get_fastapi_app() -> FastAPI:
     for exc_type, handler in exceptions_handlers.all_handlers.items():
         app.add_exception_handler(exc_type, handler)
         
-    app.include_router(user.router, video.router)
+    app.include_router(user.router)
+    app.include_router(video.router)
     setup_dishka(container, app)
     return app
 

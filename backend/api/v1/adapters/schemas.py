@@ -18,8 +18,12 @@ class GetUser(BaseModel):
     email: str = Field(title='Email of the user')
     password: str = Field(title='Password of the user')
 
-class SearchVideoOut(BaseModel):
+class GetVideo(BaseModel):
     name: str = Field(title='Name of the video')
     length_seconds: int = Field(title='Length of the video')
     size: str = Field(title='Size of the video')
     uploaded_at: datetime.date = Field(title='Date of the video')
+    
+
+class SearchVideoOut(BaseModel):
+    videos: list[GetVideo] = Field(title='List of videos')

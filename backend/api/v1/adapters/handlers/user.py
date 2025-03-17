@@ -10,9 +10,9 @@ router = APIRouter(prefix='/users', tags=['User'], route_class=DishkaRoute)
 
 @router.post('', status_code=status.HTTP_201_CREATED, name='Create user', 
              summary='Creates a new user',
-             responses={status.HTTP_422_UNPROCESSABLE_ENTITY: user_responses[422], 
-                        status.HTTP_409_CONFLICT: user_responses[409],
-                        status.HTTP_201_CREATED: user_responses[201]}
+             responses={status.HTTP_422_UNPROCESSABLE_ENTITY: user_responses['create'][422], 
+                        status.HTTP_409_CONFLICT: user_responses['create'][409],
+                        status.HTTP_201_CREATED: user_responses['create'][201]}
              )
 async def create_user(user: CreateUser, interactor: FromDishka[CreateUserInteractor]) -> dict:
     token = await interactor(dto.CreateUserDTO(**user.model_dump()))
@@ -21,12 +21,12 @@ async def create_user(user: CreateUser, interactor: FromDishka[CreateUserInterac
 
 @router.put('', status_code=status.HTTP_200_OK, name='Update user', 
             summary='Updates an existing user',
-            responses={status.HTTP_422_UNPROCESSABLE_ENTITY: user_responses[422], 
-                       status.HTTP_409_CONFLICT: user_responses[409],
+            responses={status.HTTP_422_UNPROCESSABLE_ENTITY: user_responses['update'][422], 
+                       status.HTTP_409_CONFLICT: user_responses['update'][409],
                        status.HTTP_401_UNAUTHORIZED: common_responses[401],
-                       status.HTTP_400_BAD_REQUEST: user_responses[400],
-                       status.HTTP_404_NOT_FOUND: user_responses[404],
-                       status.HTTP_200_OK: user_responses[200]}
+                       status.HTTP_400_BAD_REQUEST: user_responses['update'][400],
+                       status.HTTP_404_NOT_FOUND: user_responses['update'][404],
+                       status.HTTP_200_OK: user_responses['update'][200]}
             )
 async def update_user(user: UpdateUser, interactor: FromDishka[UpdateUserInteractor]) -> dict:
     
@@ -37,9 +37,9 @@ async def update_user(user: UpdateUser, interactor: FromDishka[UpdateUserInterac
 
 @router.get('', status_code=status.HTTP_200_OK, name='Get user', 
             summary='Returns the user data',
-            responses={status.HTTP_404_NOT_FOUND: user_responses[404],
+            responses={status.HTTP_404_NOT_FOUND: user_responses['get'][404],
                        status.HTTP_401_UNAUTHORIZED: common_responses[401],
-                       status.HTTP_200_OK: user_responses[200]}
+                       status.HTTP_200_OK: user_responses['get'][200]}
             )
 async def get_user(interactor: FromDishka[GetUserInteractor]) -> GetUser:
     user = await interactor()
@@ -47,9 +47,9 @@ async def get_user(interactor: FromDishka[GetUserInteractor]) -> GetUser:
 
 @router.delete('', status_code=status.HTTP_200_OK, name='Delete user', 
                summary='Deletes the user',
-               responses={status.HTTP_404_NOT_FOUND: user_responses[404],
+               responses={status.HTTP_404_NOT_FOUND: user_responses['delete'][404],
                           status.HTTP_401_UNAUTHORIZED: common_responses[401],
-                          status.HTTP_200_OK: user_responses[200]}
+                          status.HTTP_200_OK: user_responses['delete'][200]}
                )
 async def delete_user(interactor: FromDishka[DeleteUserInteractor]) -> dict:
     await interactor()

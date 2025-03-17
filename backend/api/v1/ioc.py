@@ -5,7 +5,7 @@ from infrastructure.db.database import new_session_maker
 from typing import AsyncIterable
 from application import interfaces
 from infrastructure.db.repositories import UserRepository, VideoRepository
-from application.interactors import CreateUserInteractor, UpdateUserInteractor, GetUserInteractor, DeleteUserInteractor, SearchUserVideoInteractor
+from application.interactors import CreateUserInteractor, UpdateUserInteractor, GetUserInteractor, DeleteUserInteractor, SearchUserVideosInteractor
 from uuid import uuid4
 from application import validators
 from infrastructure.auth import auth
@@ -52,4 +52,7 @@ class FastApiApp(Provider):
     
     video_repository = provide(VideoRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserVideoSearcher])
     
-    search_user_video_interactor = provide(SearchUserVideoInteractor, scope=Scope.REQUEST)
+    
+    
+    search_user_videos_validator = provide(validators.SearchUserVideosValidator, scope=Scope.APP, provides=AnyOf[interfaces.SearchUserVideosValidator])
+    search_user_video_interactor = provide(SearchUserVideosInteractor, scope=Scope.REQUEST)
