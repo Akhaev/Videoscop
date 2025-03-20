@@ -3,8 +3,8 @@ from typing import Protocol
 from domen import entities
 from uuid import UUID
 from typing import NewType
-import datetime
-
+from datetime import date
+from . import dto
 Token = NewType('Token', str)
 
 
@@ -69,10 +69,16 @@ class UserDeletter(Protocol):
 class UserVideoSearcher(Protocol):
     
     @abstractmethod
-    def search(self, user_id: str, date: datetime.date | None) -> list[entities.Video] | None:
+    def search(self, user_id: str, date: date | None, count: int, cursor: str | None) -> dict['videos': list[entities.Video], 'cursor': str ] | None:
         pass
 
-class SearchUserVideosValidator(Protocol):
+class DateValidator(Protocol):
     @abstractmethod
-    def validate(self, date: datetime.date | None) -> None:
+    def validate(self, date: date | None) -> None:
         pass
+
+class UserSearchVideosValidator(Protocol):
+    @abstractmethod
+    def validate(self, count: int, date: date | None) -> None:
+        pass
+

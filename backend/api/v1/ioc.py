@@ -52,7 +52,5 @@ class FastApiApp(Provider):
     
     video_repository = provide(VideoRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserVideoSearcher])
     
-    
-    
-    search_user_videos_validator = provide(validators.SearchUserVideosValidator, scope=Scope.APP, provides=AnyOf[interfaces.SearchUserVideosValidator])
+    search_user_videos_validator = provide(validators.UserSearchVideosValidator, scope=Scope.APP, provides=AnyOf[interfaces.UserSearchVideosValidator])
     search_user_video_interactor = provide(SearchUserVideosInteractor, scope=Scope.REQUEST)

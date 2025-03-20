@@ -3,7 +3,7 @@ from . import dto
 from domen import entities
 from . import exceptions
 from dataclasses import asdict
-import datetime
+
 
 class CreateUserInteractor:
     def __init__(self, repository: interfaces.UserCreater, 
@@ -50,7 +50,7 @@ class UpdateUserInteractor:
         self.auth = auth
         self.db_session = db_session
     
-    async def __call__(self, dto: dto.UpdateUserDto, current_password: str | None = None) -> None:
+    async def __call__(self, dto: dto.UpdateUserDto) -> None:
         user_id = self.auth.get_current_user()
         
         if user_id is None:
@@ -107,23 +107,23 @@ class SearchUserVideosInteractor:
     def __init__(self, repository: interfaces.UserVideoSearcher, 
                  auth: interfaces.AuthCurrentUserGetter,
                  db_session: interfaces.DBSession,
-                 validator: interfaces.SearchUserVideosValidator) -> None:
+                 validator: interfaces.UserSearchVideosValidator) -> None:
         self.repository = repository
         self.auth = auth
         self.db_session = db_session
         self.validator = validator
     
-    def __call__(self, date: datetime.date | None) -> list[entities.Video] | None:
+    async def __call__(self, dto: dto.SearchUserVideosDTO) -> dict['videos': list[entities.Video], 'cursor': str | None]:
         user_id = self.auth.get_current_user()
         
         if user_id is None:
             raise exceptions.UnauthorizedError()
         
-        self.validator.validate(date)
+        self.validator.validate(dto.count, dto.date)
         
-        videos = self.repository.search_by_date(user_id, date)
+        result = await self.repository.search(user_id, dto.date, dto.count, dto.cursor)
         
-        if videos is None:
-            return None
+        if result is None:
+            return {"videos": [], "cursor": None}
         
-        return videos
+        return result

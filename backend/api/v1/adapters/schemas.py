@@ -18,12 +18,17 @@ class GetUser(BaseModel):
     email: str = Field(title='Email of the user')
     password: str = Field(title='Password of the user')
 
-class GetVideo(BaseModel):
+class Video(BaseModel):
     name: str = Field(title='Name of the video')
     length_seconds: int = Field(title='Length of the video')
     size: str = Field(title='Size of the video')
     uploaded_at: datetime.date = Field(title='Date of the video')
     
+class SearchVideoIn(BaseModel):
+    date: datetime.date | None = Field(default=None, title='Date of the video')
+    count: int = Field(title='Count of the videos')
+    cursor: str | None = Field(default=None, title='Cursor for pagination')
 
 class SearchVideoOut(BaseModel):
-    videos: list[GetVideo] = Field(title='List of videos')
+    videos: list[Video] = Field(title='List of videos')
+    cursor: str | None = Field(title='Cursor for pagination')

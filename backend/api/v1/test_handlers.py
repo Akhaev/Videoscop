@@ -69,3 +69,23 @@ def test_user_crud(user_data, updated_user_data):
     # Try to delete the user again
     delete_response_after_delete = client.delete("/users", headers=headers)
     assert delete_response_after_delete.status_code == 404
+
+
+def test_search_user_video_no_videos(user_data):
+    # Создаем пользователя
+    create_response = client.post("/users", json=user_data)
+    assert create_response.status_code == 201
+    token = create_response.json()["token"]
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Проверяем поиск видео, когда видео отсутствуют
+    search_params = {
+        "count": 1,
+        "date": "2025-03-02"
+    }
+    search_response = client.get("/videos/search", params=search_params, headers=headers)
+    assert search_response.status_code == 200
+    assert "videos" in search_response.json()
+    assert len(search_response.json()["videos"]) != 0
+    assert search_response.json()["cursor"] is None

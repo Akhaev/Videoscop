@@ -143,7 +143,7 @@ user_responses = {
             "content": {
                 "application/json": {
                     "example": {
-                        "User": str(schemas.GetUser),
+                        "User": 'user data',
                     }
                 }
             }
@@ -180,7 +180,7 @@ video_responses = {
             "content": {
                 "application/json": {
                     "example": {
-                        "videos": str(schemas.SearchVideoOut(videos=[schemas.GetVideo(name='video', length_seconds=4, size=4, uploaded_at=datetime.date.today())])),
+                        "videos": '[videos]'
                     },
                 },
             },

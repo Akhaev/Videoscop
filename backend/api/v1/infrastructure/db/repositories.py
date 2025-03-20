@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select, update, text
 from application import interfaces
 from domen import entities
 from . import models
@@ -9,9 +9,10 @@ from sqlalchemy import Column
 from typing import Any
 from . import exceptions
 import datetime
+import time
 
-def Sha512Hash(password: str) -> str:
-    hashed_password = hashlib.sha512(password.encode('utf-8')).hexdigest()
+def Sha512Hash(text: str) -> str:
+    hashed_password = hashlib.sha512(text.encode('utf-8')).hexdigest()
     return hashed_password
 
 class UserRepository(interfaces.UserCreater, interfaces.UserUpdater):
@@ -73,7 +74,46 @@ class VideoRepository(interfaces.UserVideoSearcher):
                              length_seconds=video.length_seconds, size=video.size)
         self.session.add(video)
 
-    async def search(self, user_id: str, date: datetime.date | None) -> list[entities.Video] | None:
-        videos = await self.session.execute(select(models.Video).where(models.Video.author_uuid == user_id, models.Video.uploaded_at == date).order_by(models.Video.name))
-        return [entities.Video(uuid=video.uuid, name=video.name, author=video.author, 
-                               length_seconds=video.length_seconds, size=video.size, uploaded_at=video.uploaded_at) for video in videos]
+    async def search(self, user_id: str, date: datetime.date | None, count: int, cursor: str | None) -> dict['videos': list[entities.Video], 'cursor': str] | None:
+        videos = []
+        
+
+        if cursor is None:
+            current_time = int(time.time() * 1000)
+            cursor = hashlib.sha512(f'user_id_{user_id}_{current_time}'.encode('utf-8')).hexdigest()
+
+            declare_query = text("""
+                DECLARE :cursor CURSOR WITH HOLD FOR 
+                SELECT * FROM videos 
+                WHERE author_uuid = :user_id AND uploaded_at = :date
+                ORDER BY name
+            """)
+
+            await self.session.execute(declare_query, {"cursor": cursor, "user_id": user_id, "date": date})
+
+        fetch_query = text("""
+            FETCH :count FROM :cursor
+        """)
+
+        result = await self.session.execute(fetch_query, {"cursor": cursor, "count": count})
+        
+        rows = result.fetchall()
+        
+        if not rows:
+            await self.session.execute(text("CLOSE :cursor"), {"cursor": cursor})
+            return None
+        
+        videos = [
+            entities.Video(
+                uuid=video.uuid, 
+                name=video.name, 
+                author=video.author, 
+                length_seconds=video.length_seconds, 
+                size=video.size,
+                uploaded_at=video.uploaded_at
+            ) 
+            for video in rows
+        ]
+        
+
+        return {'videos': videos, 'cursor': cursor}
