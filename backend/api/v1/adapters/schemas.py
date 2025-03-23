@@ -23,12 +23,12 @@ class Video(BaseModel):
     length_seconds: int = Field(title='Length of the video')
     size: str = Field(title='Size of the video')
     uploaded_at: datetime.date = Field(title='Date of the video')
-    
+
 class SearchVideoIn(BaseModel):
-    date: datetime.date | None = Field(default=None, title='Date of the video')
-    count: int = Field(title='Count of the videos')
-    cursor: str | None = Field(default=None, title='Cursor for pagination')
+    date: datetime.date | None = Field(title='Date of the video', default=None)
+    count: int = Field(title='Count of the video')
+    cursor: str | None = Field(title='Cursor of the video', default=None)
 
 class SearchVideoOut(BaseModel):
     videos: list[Video] = Field(title='List of videos')
-    cursor: str | None = Field(title='Cursor for pagination')
+    cursor: str | None = Field(title='Cursor of the video')

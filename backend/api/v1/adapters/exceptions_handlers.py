@@ -1,10 +1,10 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
-from asyncpg.exceptions import UniqueViolationError
 import json
 import jwt
 from application.exceptions import UnAuthorizedError, ValidationError
 from infrastructure.db.exceptions import RecordDontExistsError
+from sqlalchemy.exc import IntegrityError
 
 # Этот хендлер срабатывает, когда возникает ошибка валидации данных.
 async def validation_exception_handler(request: Request, exc: ValidationError) -> JSONResponse:
@@ -21,9 +21,23 @@ async def validation_exception_handler(request: Request, exc: ValidationError) -
     )
 
 # Этот хендлер срабатывает, когда возникает ошибка уникальности данных в базе данных.
-async def integrity_error_handler(request: Request, exc: UniqueViolationError) -> JSONResponse:
-    problem_fields = {field: "already exists" for field in exc.args[0]}
-    
+async def integrity_error_handler(request: Request, exc: IntegrityError) -> JSONResponse:
+    # Извлекаем информацию о нарушении уникальности
+    detail = str(exc.orig)
+    problem_fields = {}
+    if "uq_user_login" in detail:
+        problem_fields["login"] = "already exists"
+    if "uq_user_email" in detail:
+        problem_fields["email"] = "already exists"
+    if "uq_video_name_author" in detail:
+        problem_fields["name"] = "already exists for this author"
+    if "uq_heat_map_video" in detail:
+        problem_fields["video"] = "already has a heat map"
+    if 'fk_video_author' in detail:
+        problem_fields["author"] = "author does not exist"
+    if 'fk_heat_map_video' in detail:
+        problem_fields["video"] = "video does not exist"
+
     error_message = {
         "message": "Conflict field/fields",
         "problem_fields": problem_fields
@@ -70,7 +84,7 @@ async def record_not_found_handler(request: Request, exc: RecordDontExistsError)
     )
 
 all_handlers = { 
-    UniqueViolationError: integrity_error_handler,
+    IntegrityError: integrity_error_handler,
     jwt.ExpiredSignatureError: expired_token_handler,
     jwt.InvalidTokenError: invalid_token_handler,
     UnAuthorizedError: unauthorized_handler,

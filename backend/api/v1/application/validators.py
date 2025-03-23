@@ -1,26 +1,18 @@
-from dataclasses import dataclass
 import re
 import datetime
 from .exceptions import ValidationError
 from . import interfaces
 from . import dto
-@dataclass
-class CreateUser:
-    login: str
-    email: str
-    password: str
 
-    def __post_init__(self):
-        self.validate()
-
-    def validate(self):
+class CreateUserValidator(interfaces.CreateUserValidator):
+    def validate(self, user: dto.CreateUserDTO) -> None:
         errors = []
 
-        if not (3 <= len(self.login) <= 50):
+        if not (3 <= len(user.login) <= 50):
             errors.append(ValidationError.add_error("login", "Login must be between 3 and 50 characters"))
-        if not self.is_valid_email(self.email):
+        if not self.is_valid_email(user.email):
             errors.append(ValidationError.add_error("email", "Invalid email format"))
-        if len(self.password) < 8:
+        if len(user.password) < 8:
             errors.append(ValidationError.add_error("password", "Password must be at least 8 characters long"))
 
         if errors:
@@ -30,43 +22,23 @@ class CreateUser:
     def is_valid_email(email: str) -> bool:
         return bool(re.match(r"^[\w.-]+@[\w.-]+\.\w+$", email))
 
-class CreateUserValidator(interfaces.CreateUserValidator):
-    def validate(self, user: dto.CreateUserDTO):
-        try:
-            CreateUser(
-                login=user.login,
-                email=user.email,
-                password=user.password
-            )
-        except ValidationError as e:
-            raise e
-        
-        
-@dataclass
-class UpdateUser:
-    login: str | None
-    email: str | None
-    password: str | None
-
-    def __post_init__(self):
-        self.validate()
-
-    def validate(self):
+class UpdateUserValidator(interfaces.UpdateUserValidator):
+    def validate(self, user: dto.UpdateUserDto) -> None:
         errors = []
 
-        if self.login is not None:
-            if not (3 <= len(self.login) <= 50):
+        if user.login is not None:
+            if not (3 <= len(user.login) <= 50):
                 errors.append(ValidationError.add_error("login", "Login must be between 3 and 50 characters"))
 
-        if self.email is not None:
-            if not self.is_valid_email(self.email):
+        if user.email is not None:
+            if not self.is_valid_email(user.email):
                 errors.append(ValidationError.add_error("email", "Invalid email format"))
 
-        if self.password is not None:
-            if len(self.password) < 8:
+        if user.password is not None:
+            if len(user.password) < 8:
                 errors.append(ValidationError.add_error("password", "Password must be at least 8 characters long"))
 
-        if not any(field is not None for field in [self.login, self.email, self.password]):
+        if not any(field is not None for field in [user.login, user.email, user.password]):
             errors.append(ValidationError.add_error("general", "At least one field must be provided"))
 
         if errors:
@@ -76,19 +48,7 @@ class UpdateUser:
     def is_valid_email(email: str) -> bool:
         return bool(re.match(r"^[\w.-]+@[\w.-]+\.\w+$", email))
 
-
-class UpdateUserValidator(interfaces.UpdateUserValidator):
-    def validate(self, user: dto.UpdateUserDto):
-        try:
-            UpdateUser(
-                login=user.login,
-                email=user.email,
-                password=user.password
-            )
-        except ValidationError as e:
-            raise e
-
-class UserSearchVideosValidator(interfaces.UserSearchVideosValidator):
+class SearchUserVideosValidator(interfaces.SearchUserVideosValidator):
     def validate(self, count: int, date: datetime.date | None) -> None:
         errors = []
 
@@ -104,6 +64,20 @@ class UserSearchVideosValidator(interfaces.UserSearchVideosValidator):
                 errors.append(ValidationError.add_error("date", "Date cannot be earlier than March 1, 2025"))
             if date > datetime.date.today():
                 errors.append(ValidationError.add_error("date", "Date cannot be in the future"))
+
+        if errors:
+            raise ValidationError(errors)
+
+class CreateVideoValidator(interfaces.CreateVideoValidator):
+    def validate(self, video: dto.CreateVideoDTO) -> None:
+        errors = []
+
+        if not (3 <= len(video.name) <= 50):
+            errors.append(ValidationError.add_error("name", "Name must be between 3 and 50 characters"))
+        if not (1 <= video.length_seconds <= 3600):
+            errors.append(ValidationError.add_error("length_seconds", "Length must be between 1 and 3600 seconds"))
+        if not isinstance(video.size, int) or not (1 <= video.size <= 1000):  # Проверка на int
+            errors.append(ValidationError.add_error("size", "Size must be an integer between 1 and 1000 MB"))
 
         if errors:
             raise ValidationError(errors)

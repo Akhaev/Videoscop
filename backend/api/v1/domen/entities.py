@@ -12,18 +12,17 @@ class User:
 class Video:
     uuid: int
     name: str
-    author: User
+    author_uuid: int
     length_seconds: int
-    size: str
+    size: int
     uploaded_at: datetime.date
     
 @dataclass(slots=True)
 class HeatMap:
     uuid: int
-    video: Video
+    video_uuid: int 
     heat_map_data: dict
-    
 
 
 
-    
+

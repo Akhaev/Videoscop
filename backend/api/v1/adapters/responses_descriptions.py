@@ -180,7 +180,7 @@ video_responses = {
             "content": {
                 "application/json": {
                     "example": {
-                        "videos": '[videos]'
+                        "videos": "[video1_data, video2_data]",
                     },
                 },
             },

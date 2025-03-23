@@ -20,8 +20,8 @@ class FastApiApp(Provider):
     
     @provide(scope=Scope.APP)
     async def get_session_maker(self, config: Config) -> async_sessionmaker[AsyncSession]:
-        async_sessionmaker = await new_session_maker(config.postgres)
-        return async_sessionmaker
+        async_session_maker = await new_session_maker(config.postgres)
+        return async_session_maker
     
     @provide(scope=Scope.REQUEST)
     async def get_async_session(self, async_sessionmaker: async_sessionmaker[AsyncSession]) -> AsyncIterable[AnyOf[AsyncSession,interfaces.DBSession]]:
@@ -52,5 +52,5 @@ class FastApiApp(Provider):
     
     video_repository = provide(VideoRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserVideoSearcher])
     
-    search_user_videos_validator = provide(validators.UserSearchVideosValidator, scope=Scope.APP, provides=AnyOf[interfaces.UserSearchVideosValidator])
+    search_user_videos_validator = provide(validators.SearchUserVideosValidator, scope=Scope.APP, provides=AnyOf[interfaces.SearchUserVideosValidator])
     search_user_video_interactor = provide(SearchUserVideosInteractor, scope=Scope.REQUEST)

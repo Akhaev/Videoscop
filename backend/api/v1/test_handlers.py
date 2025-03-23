@@ -85,7 +85,8 @@ def test_search_user_video_no_videos(user_data):
         "date": "2025-03-02"
     }
     search_response = client.get("/videos/search", params=search_params, headers=headers)
+    print(search_response.content)
     assert search_response.status_code == 200
     assert "videos" in search_response.json()
-    assert len(search_response.json()["videos"]) != 0
+    assert search_response.json()["videos"] == []
     assert search_response.json()["cursor"] is None

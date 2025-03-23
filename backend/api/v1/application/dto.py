@@ -19,3 +19,10 @@ class SearchUserVideosDTO:
     date: date | None
     count: int
     cursor: str | None
+
+@dataclass(slots=True)
+class CreateVideoDTO:
+    name: str
+    length_seconds: int
+    size: int
+    author_uuid: int  # Изменено с author_id на author_uuid
