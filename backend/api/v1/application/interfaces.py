@@ -82,7 +82,27 @@ class VideoCreater(Protocol):
     def create(self, video: entities.Video) -> None:
         pass
     
+class VideoGetter(Protocol):
+    @abstractmethod
+    def get_by_author_and_name(self, author: str, name: str) -> entities.Video:
+        pass
+    
 class CreateVideoValidator(Protocol):
     @abstractmethod
     def validate(self, video: entities.Video) -> None:
+        pass
+
+class GetFileUploadLink(Protocol):
+    @abstractmethod
+    def get_upload_link(self, file_name) -> str:
+        pass
+
+class HeatMapCreater(Protocol):
+    @abstractmethod
+    def create(self, heat_map: entities.HeatMap) -> None:
+        pass
+
+class CreateHeatMapValidator(Protocol):
+    @abstractmethod
+    def validate(self, video_name: str) -> None:
         pass

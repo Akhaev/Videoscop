@@ -1,6 +1,6 @@
 import config
 from fastapi import FastAPI
-from adapters.handlers import user, video
+from adapters.handlers import user, video, heatmap
 from dishka.integrations.fastapi import setup_dishka, FastapiProvider
 from dishka import make_async_container
 from ioc import FastApiApp
@@ -18,6 +18,7 @@ def get_fastapi_app() -> FastAPI:
         
     app.include_router(user.router)
     app.include_router(video.router)
+    app.include_router(heatmap.router)
     setup_dishka(container, app)
     return app
 

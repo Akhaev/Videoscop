@@ -66,12 +66,44 @@ class UserRepository(interfaces.UserCreater, interfaces.UserUpdater):
 class VideoRepository(interfaces.UserVideoSearcher):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+    
+    async def get_by_author_and_name(self, author_uuid: str, name: str) -> entities.Video:
+        user_exists = await UserRepository(self.session).exists_by(models.User.uuid, author_uuid)
         
+        if not user_exists:
+            raise exceptions.RecordDontExistsError('User not found')
+        
+        video = await self.session.execute(
+            select(models.Video).where(
+                models.Video.author_uuid == author_uuid,
+                models.Video.name == name
+            )
+        )
+        video = video.scalar_one_or_none()
+        
+        if video is None:
+            raise exceptions.RecordDontExistsError('Video not found')
+        
+        return entities.Video(
+            uuid=video.uuid,
+            name=video.name,
+            author_uuid=video.author_uuid,
+            length_seconds=video.length_seconds,
+            size=video.size,
+            uploaded_at=video.uploaded_at
+        )
+    
     async def create(self, video: entities.Video) -> None:
+        
+        user_exists = await UserRepository(self.session).exists_by(models.User.uuid, video.author_uuid)
+        
+        if not user_exists:
+            raise exceptions.RecordDontExistsError('User not found')
+        
         video = models.Video(
             uuid=video.uuid, 
             name=video.name, 
-            author_uuid=video.author, 
+            author_uuid=video.author_uuid, 
             length_seconds=video.length_seconds, 
             size=video.size,
             uploaded_at=video.uploaded_at
@@ -116,7 +148,7 @@ class VideoRepository(interfaces.UserVideoSearcher):
             entities.Video(
                 uuid=video.uuid, 
                 name=video.name, 
-                author=video.author, 
+                author=video.author_uuid, 
                 length_seconds=video.length_seconds, 
                 size=video.size,
                 uploaded_at=video.uploaded_at
@@ -126,3 +158,11 @@ class VideoRepository(interfaces.UserVideoSearcher):
         
 
         return {'videos': videos, 'cursor': cursor}
+    
+class HeatMapRepository(interfaces.HeatMapCreater):
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+    
+    async def create(self, heat_map: entities.HeatMap) -> None:
+        heat_map = models.HeatMap(uuid=heat_map.uuid, video_uuid=heat_map.video_uuid)
+        self.session.add(heat_map)

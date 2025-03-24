@@ -12,8 +12,8 @@ class User(Base):
     __tablename__ = 'users'
     
     uuid = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    login: Mapped[str] = mapped_column(sa.String(50), unique=True, index=True, nullable=False)
-    email: Mapped[str] = mapped_column(sa.String(255), unique=True, nullable=False)
+    login: Mapped[str] = mapped_column(sa.String(50), nullable=False)
+    email: Mapped[str] = mapped_column(sa.String(255), nullable=False)
     password: Mapped[str] = mapped_column(sa.String(255), nullable=False)
     videos: Mapped[list["Video"]] = relationship(back_populates="author")
     
@@ -30,23 +30,23 @@ class Video(Base):
     length_seconds: Mapped[int] = mapped_column(sa.Integer, nullable=False)
     size: Mapped[int] = mapped_column(sa.Integer, nullable=False)
     uploaded_at: Mapped[datetime.date] = mapped_column(sa.Date, nullable=False, default=datetime.date.today)    
-    author_uuid = mapped_column(sa.ForeignKey('users.uuid'), nullable=False)
+    author_uuid = mapped_column(UUID(as_uuid=True), nullable=False)  # Просто обычный столбец для uuid
     author: Mapped["User"] = relationship(back_populates="videos")
     heat_map: Mapped["HeatMap"] = relationship(back_populates="video")
     
     __table_args__ = (
         sa.UniqueConstraint('name', 'author_uuid', name='uq_video_name_author'),
-        sa.ForeignKey(['author_uuid', 'users.uuid'], ondelete='CASCADE', name='fk_video_author'),
+        sa.ForeignKeyConstraint(['author_uuid'], ['users.uuid'], ondelete='CASCADE', name='fk_video_author'),  # Внешний ключ на уровне таблицы
     )
 
 class HeatMap(Base):
     __tablename__ = 'heat_maps'
     
     uuid = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    video_uuid = mapped_column(sa.ForeignKey('videos.uuid'), nullable=False)
+    video_uuid = mapped_column(UUID(as_uuid=True), nullable=False)  # Просто обычный столбец для video_uuid
     video: Mapped["Video"] = relationship(back_populates="heat_map")
     
     __table_args__ = (
         sa.UniqueConstraint('video_uuid', name='uq_heat_map_video'),
-        sa.ForeignKey(['video_uuid', 'videos.uuid'], ondelete='CASCADE', name='fk_heat_map_video'),
+        sa.ForeignKeyConstraint(['video_uuid'], ['videos.uuid'], ondelete='CASCADE', name='fk_heat_map_video'),  # Внешний ключ на уровне таблицы
     )

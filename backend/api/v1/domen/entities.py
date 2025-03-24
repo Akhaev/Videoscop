@@ -21,7 +21,7 @@ class Video:
 class HeatMap:
     uuid: int
     video_uuid: int 
-    heat_map_data: dict
+
 
 
 

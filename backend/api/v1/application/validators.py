@@ -76,8 +76,18 @@ class CreateVideoValidator(interfaces.CreateVideoValidator):
             errors.append(ValidationError.add_error("name", "Name must be between 3 and 50 characters"))
         if not (1 <= video.length_seconds <= 3600):
             errors.append(ValidationError.add_error("length_seconds", "Length must be between 1 and 3600 seconds"))
-        if not isinstance(video.size, int) or not (1 <= video.size <= 1000):  # Проверка на int
+        if not isinstance(video.size, int) or not (1 <= video.size <= 1000):
             errors.append(ValidationError.add_error("size", "Size must be an integer between 1 and 1000 MB"))
+
+        if errors:
+            raise ValidationError(errors)
+
+class CreateHeatMapValidator(interfaces.CreateHeatMapValidator):
+    def validate(self, video_name: str) -> None:
+        errors = []
+
+        if not (3 <= len(video_name) <= 50):
+            errors.append(ValidationError.add_error("video_name", "Name must be between 3 and 50 characters"))
 
         if errors:
             raise ValidationError(errors)

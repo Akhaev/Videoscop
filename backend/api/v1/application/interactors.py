@@ -3,7 +3,7 @@ from . import dto
 from domen import entities
 from . import exceptions
 from dataclasses import asdict
-from datetime import datetime
+import datetime
 
 class CreateUserInteractor:
     def __init__(self, repository: interfaces.UserCreater, 
@@ -83,7 +83,7 @@ class GetUserInteractor:
         
         user_entity = await self.repository.get(user_uuid)
         
-        return user_entity
+        return {'login': user_entity.login, 'email': user_entity.email}
 
 class DeleteUserInteractor:
     def __init__(self, repository: interfaces.UserDeletter, 
@@ -133,27 +133,76 @@ class CreateVideoInteractor:
                  db_session: interfaces.DBSession,
                  uuid_generator: interfaces.UUIDGenerator,
                  validator: interfaces.CreateVideoValidator, 
-                 auth: interfaces.AuthCurrentUserGetter,) -> None:
+                 auth: interfaces.AuthCurrentUserGetter,
+                 file_storage: interfaces.GetFileUploadLink) -> None:
         self.repository = repository
         self.db_session = db_session
         self.uuid_generator = uuid_generator
         self.validator = validator
         self.auth = auth
+        self.file_storage = file_storage
         
-    async def __call__(self, dto: dto.CreateVideoDTO) -> None:
+    async def __call__(self, dto: dto.CreateVideoDTO) -> str:
         uuid = str(self.uuid_generator())
-        user_uuid = self.auth.get_current_user()
+        author_uuid = self.auth.get_current_user()
+        
         self.validator.validate(dto)
         
         video_entity = entities.Video(
             uuid = uuid,
             name=dto.name,
-            author_id=user_uuid,
+            author_uuid=author_uuid,
             length_seconds=dto.length_seconds,
             size=dto.size,
-            uploaded_at=datetime.date(),
+            uploaded_at=datetime.date.today(),
         )
         
         await self.repository.create(video_entity)
         
         await self.db_session.commit()
+        
+        upload_link = await self.file_storage.get_upload_link(dto.name)
+        
+        return upload_link
+
+class CreateHeatMapInteractor:
+    def __init__(self, repository: interfaces.HeatMapCreater,
+                 video_repository: interfaces.VideoGetter, 
+                 db_session: interfaces.DBSession,
+                 uuid_generator: interfaces.UUIDGenerator,
+                 auth: interfaces.AuthCurrentUserGetter,
+                 file_storage: interfaces.GetFileUploadLink,
+                 validator: interfaces.CreateHeatMapValidator) -> None:
+        
+        self.repository = repository
+        self.db_session = db_session
+        self.uuid_generator = uuid_generator
+        self.auth = auth
+        self.file_storage = file_storage
+        self.video_repository = video_repository
+        self.validator = validator
+        
+    async def __call__(self, video_name: str) -> str:
+        print('dasdsa')
+        self.validator.validate(video_name)
+        uuid = str(self.uuid_generator())
+        user_uuid = self.auth.get_current_user()
+        
+        if user_uuid is None:
+            raise exceptions.UnauthorizedError()
+        
+        video = await self.video_repository.get_by_author_and_name(user_uuid, video_name)
+        
+        heat_map_entity = entities.HeatMap(
+            uuid=uuid,
+            video_uuid=video.uuid
+        )
+        
+        await self.repository.create(heat_map_entity)
+        await self.db_session.commit()
+        
+        upload_link = await self.file_storage.get_upload_link(video_name)
+        return upload_link
+
+
+

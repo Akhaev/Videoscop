@@ -16,7 +16,6 @@ class UpdateUser(BaseModel):
 class GetUser(BaseModel):
     login: str = Field(title='Login of the user')
     email: str = Field(title='Email of the user')
-    password: str = Field(title='Password of the user')
 
 class Video(BaseModel):
     name: str = Field(title='Name of the video')
@@ -32,3 +31,8 @@ class SearchVideoIn(BaseModel):
 class SearchVideoOut(BaseModel):
     videos: list[Video] = Field(title='List of videos')
     cursor: str | None = Field(title='Cursor of the video')
+
+class CreateVideoIn(BaseModel):
+    name: str = Field(title='Name of the video')
+    length_seconds: int = Field(title='Length of the video')
+    size: int = Field(title='Size of the video')
