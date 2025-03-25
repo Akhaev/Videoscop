@@ -109,7 +109,6 @@ def test_full_flow(user_data, updated_user_data, video_data):
 
     # 5. Создание тепловой карты
     heatmap_data = {"video_name": video_data["name"]}
-    print(f"Debug: Creating heatmap with video_name={video_data['name']}")
     create_heatmap_response = client.post("/user/videos/heatmap", json=heatmap_data, headers=headers)
     log_response("Создание тепловой карты", create_heatmap_response, heatmap_data)
     assert create_heatmap_response.status_code == 201

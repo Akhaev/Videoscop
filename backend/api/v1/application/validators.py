@@ -5,7 +5,7 @@ from . import interfaces
 from . import dto
 
 class CreateUserValidator(interfaces.CreateUserValidator):
-    def validate(self, user: dto.CreateUserDTO) -> None:
+    def validate(self, user: dto.CreateUserInDTO) -> None:
         errors = []
 
         if not (3 <= len(user.login) <= 50):
@@ -23,7 +23,7 @@ class CreateUserValidator(interfaces.CreateUserValidator):
         return bool(re.match(r"^[\w.-]+@[\w.-]+\.\w+$", email))
 
 class UpdateUserValidator(interfaces.UpdateUserValidator):
-    def validate(self, user: dto.UpdateUserDto) -> None:
+    def validate(self, user: dto.UpdateUserInDTO) -> None:
         errors = []
 
         if user.login is not None:
@@ -69,7 +69,7 @@ class SearchUserVideosValidator(interfaces.SearchUserVideosValidator):
             raise ValidationError(errors)
 
 class CreateVideoValidator(interfaces.CreateVideoValidator):
-    def validate(self, video: dto.CreateVideoDTO) -> None:
+    def validate(self, video: dto.CreateVideoInDTO) -> None:
         errors = []
 
         if not (3 <= len(video.name) <= 50):

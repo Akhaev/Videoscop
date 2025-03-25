@@ -1,10 +1,9 @@
 from fastapi import APIRouter, status
 from dishka.integrations.fastapi import FromDishka, DishkaRoute
 from application.interactors import CreateUserInteractor, UpdateUserInteractor, GetUserInteractor, DeleteUserInteractor
-from application import dto
-from ..schemas import CreateUser, UpdateUser, GetUser
+from ..schemas import CreateUserIn, CreateUserOut, UpdateUserIn, UpdateUserOut, GetUserOut, DeleteUserOut
 from ..responses_descriptions import user_responses, common_responses                               
-
+from application import dto
 
 router = APIRouter(prefix='/users', tags=['User'], route_class=DishkaRoute)
 
@@ -14,9 +13,13 @@ router = APIRouter(prefix='/users', tags=['User'], route_class=DishkaRoute)
                         status.HTTP_409_CONFLICT: user_responses['create'][409],
                         status.HTTP_201_CREATED: user_responses['create'][201]}
              )
-async def create_user(user: CreateUser, interactor: FromDishka[CreateUserInteractor]) -> dict:
-    token = await interactor(dto.CreateUserDTO(**user.model_dump()))
-    return {"token": token}
+async def create_user(user: CreateUserIn, interactor: FromDishka[CreateUserInteractor]) -> CreateUserOut:
+    result = await interactor(dto.CreateUserInDTO(
+        login=user.login,
+        email=user.email,
+        password=user.password
+    ))
+    return CreateUserOut(token=result.token)
 
 
 @router.put('', status_code=status.HTTP_200_OK, name='Update user', 
@@ -28,12 +31,15 @@ async def create_user(user: CreateUser, interactor: FromDishka[CreateUserInterac
                        status.HTTP_404_NOT_FOUND: user_responses['update'][404],
                        status.HTTP_200_OK: user_responses['update'][200]}
             )
-async def update_user(user: UpdateUser, interactor: FromDishka[UpdateUserInteractor]) -> dict:
-    
-    
-    await interactor(dto.UpdateUserDto(**user.model_dump()))
-    
-    return {"message": "User updated successfully"}
+async def update_user(user: UpdateUserIn, interactor: FromDishka[UpdateUserInteractor]) -> UpdateUserOut:
+    await interactor(dto.UpdateUserInDTO(
+        login=user.login,
+        email=user.email,
+        password=user.password,
+        current_password=user.current_password
+    ))
+    return UpdateUserOut(message="User updated successfully")
+
 
 @router.get('', status_code=status.HTTP_200_OK, name='Get user', 
             summary='Returns the user data',
@@ -41,9 +47,10 @@ async def update_user(user: UpdateUser, interactor: FromDishka[UpdateUserInterac
                        status.HTTP_401_UNAUTHORIZED: common_responses[401],
                        status.HTTP_200_OK: user_responses['get'][200]}
             )
-async def get_user(interactor: FromDishka[GetUserInteractor]) -> GetUser:
-    user = await interactor()
-    return user
+async def get_user(interactor: FromDishka[GetUserInteractor]) -> GetUserOut:
+    result = await interactor()
+    return GetUserOut(login=result.login, email=result.email)
+
 
 @router.delete('', status_code=status.HTTP_200_OK, name='Delete user', 
                summary='Deletes the user',
@@ -51,7 +58,7 @@ async def get_user(interactor: FromDishka[GetUserInteractor]) -> GetUser:
                           status.HTTP_401_UNAUTHORIZED: common_responses[401],
                           status.HTTP_200_OK: user_responses['delete'][200]}
                )
-async def delete_user(interactor: FromDishka[DeleteUserInteractor]) -> dict:
+async def delete_user(interactor: FromDishka[DeleteUserInteractor]) -> DeleteUserOut:
     await interactor()
-    return {"message": "User deleted successfully"}
+    return DeleteUserOut(message="User deleted successfully")
 

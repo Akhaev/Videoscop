@@ -17,25 +17,22 @@ class CreateUserInteractor:
         self.uuid_generator = uuid_generator
         self.validator = validator
         self.auth = auth
-    async def __call__(self, dto: dto.CreateUserDTO) -> interfaces.Token:
-        
-        self.validator.validate(dto)
+
+    async def __call__(self, user_dto: dto.CreateUserInDTO) -> dto.CreateUserOutDTO:
+        self.validator.validate(user_dto)
         uuid = str(self.uuid_generator())
         
         user_entity = entities.User(
-            uuid = uuid,
-            login=dto.login,
-            email=dto.email,
-            password=dto.password
+            uuid=uuid,
+            login=user_dto.login,
+            email=user_dto.email,
+            password=user_dto.password
         )
         
         await self.repository.create(user_entity)
-        
-
-        
         token = self.auth.add(user_entity.uuid)
         await self.db_session.commit()
-        return token
+        return dto.CreateUserOutDTO(token=token)
         
 class UpdateUserInteractor:
     
@@ -50,21 +47,21 @@ class UpdateUserInteractor:
         self.auth = auth
         self.db_session = db_session
     
-    async def __call__(self, dto: dto.UpdateUserDto) -> None:
+    async def __call__(self, user_dto: dto.UpdateUserInDTO) -> dto.UpdateUserOutDTO:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
             raise exceptions.UnauthorizedError()
         
-        if dto.current_password is None and (dto.email is not None or dto.password is not None):
+        if user_dto.current_password is None and (user_dto.email or user_dto.password):
             raise ValueError('requires an up-to-date password to update password or email')
         
-        self.validator.validate(dto)
-        update_fields = {key: value for key, value in zip(asdict(dto).keys(), asdict(dto).values()) if value is not None or key != 'current_password'}
-        del update_fields['current_password']
+        self.validator.validate(user_dto)
+        update_fields = {key: value for key, value in asdict(user_dto).items() if value is not None and key != 'current_password'}
         await self.repository.update(user_uuid, update_fields)
         
         await self.db_session.commit()
+        return dto.UpdateUserOutDTO(message="User updated successfully")
         
 
 class GetUserInteractor:
@@ -75,7 +72,7 @@ class GetUserInteractor:
         self.auth = auth
         self.db_session = db_session
         
-    async def __call__(self) -> entities.User:
+    async def __call__(self) -> dto.GetUserOutDTO:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
@@ -83,7 +80,7 @@ class GetUserInteractor:
         
         user_entity = await self.repository.get(user_uuid)
         
-        return {'login': user_entity.login, 'email': user_entity.email}
+        return dto.GetUserOutDTO(login=user_entity.login, email=user_entity.email)
 
 class DeleteUserInteractor:
     def __init__(self, repository: interfaces.UserDeletter, 
@@ -93,7 +90,7 @@ class DeleteUserInteractor:
         self.auth = auth
         self.db_session = db_session
         
-    async def __call__(self):
+    async def __call__(self) -> dto.DeleteUserOutDTO:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
@@ -102,6 +99,7 @@ class DeleteUserInteractor:
         await self.repository.delete(user_uuid)
         
         await self.db_session.commit()
+        return dto.DeleteUserOutDTO(message="User deleted successfully")
 
 class SearchUserVideosInteractor:
     def __init__(self, repository: interfaces.UserVideoSearcher, 
@@ -113,20 +111,20 @@ class SearchUserVideosInteractor:
         self.db_session = db_session
         self.validator = validator
     
-    async def __call__(self, dto: dto.SearchUserVideosDTO) -> dict['videos': list[entities.Video], 'cursor': str | None]:
+    async def __call__(self, search_dto: dto.SearchUserVideosInDTO) -> dto.SearchUserVideosOutDTO:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
             raise exceptions.UnauthorizedError()
         
-        self.validator.validate(dto.count, dto.date)
+        self.validator.validate(search_dto.count, search_dto.date)
         
-        result = await self.repository.search(user_uuid, dto.date, dto.count, dto.cursor)
+        result = await self.repository.search(user_uuid, search_dto.date, search_dto.count, search_dto.cursor)
         
         if result is None:
-            return {"videos": [], "cursor": None}
+            return dto.SearchUserVideosOutDTO(videos=[], cursor=None)
         
-        return result
+        return dto.SearchUserVideosOutDTO(videos=result['videos'], cursor=result['cursor'])
     
 class CreateVideoInteractor:
     def __init__(self, repository: interfaces.VideoCreater, 
@@ -142,18 +140,18 @@ class CreateVideoInteractor:
         self.auth = auth
         self.file_storage = file_storage
         
-    async def __call__(self, dto: dto.CreateVideoDTO) -> str:
+    async def __call__(self, video_dto: dto.CreateVideoInDTO) -> dto.CreateVideoOutDTO:
         uuid = str(self.uuid_generator())
         author_uuid = self.auth.get_current_user()
         
-        self.validator.validate(dto)
+        self.validator.validate(video_dto)
         
         video_entity = entities.Video(
-            uuid = uuid,
-            name=dto.name,
+            uuid=uuid,
+            name=video_dto.name,
             author_uuid=author_uuid,
-            length_seconds=dto.length_seconds,
-            size=dto.size,
+            length_seconds=video_dto.length_seconds,
+            size=video_dto.size,
             uploaded_at=datetime.date.today(),
         )
         
@@ -161,9 +159,9 @@ class CreateVideoInteractor:
         
         await self.db_session.commit()
         
-        upload_link = await self.file_storage.get_upload_link(dto.name)
+        upload_link = await self.file_storage.get_upload_link(video_dto.name)
         
-        return upload_link
+        return dto.CreateVideoOutDTO(upload_link=upload_link)
 
 class CreateHeatMapInteractor:
     def __init__(self, repository: interfaces.HeatMapCreater,
@@ -182,16 +180,15 @@ class CreateHeatMapInteractor:
         self.video_repository = video_repository
         self.validator = validator
         
-    async def __call__(self, video_name: str) -> str:
-        print('dasdsa')
-        self.validator.validate(video_name)
+    async def __call__(self, heatmap_dto: dto.CreateHeatMapInDTO) -> dto.CreateHeatMapOutDTO:
+        self.validator.validate(heatmap_dto.video_name)
         uuid = str(self.uuid_generator())
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
             raise exceptions.UnauthorizedError()
         
-        video = await self.video_repository.get_by_author_and_name(user_uuid, video_name)
+        video = await self.video_repository.get_by_author_and_name(user_uuid, heatmap_dto.video_name)
         
         heat_map_entity = entities.HeatMap(
             uuid=uuid,
@@ -201,8 +198,8 @@ class CreateHeatMapInteractor:
         await self.repository.create(heat_map_entity)
         await self.db_session.commit()
         
-        upload_link = await self.file_storage.get_upload_link(video_name)
-        return upload_link
+        upload_link = await self.file_storage.get_upload_link(heatmap_dto.video_name)
+        return dto.CreateHeatMapOutDTO(upload_link=upload_link)
 
 
 
