@@ -80,6 +80,6 @@ class GetVideoUnloadLinkInDto:
 
 
 @dataclass(slots=True)
-class GetVideoUnloadLinkDTO:
+class GetVideoUnloadLinkOutDTO:
     unload_link: str
 

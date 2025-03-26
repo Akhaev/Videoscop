@@ -274,11 +274,11 @@ video_responses = {
 heat_map_responses = {
     'create': {
         201: {
-            "description": "Heat map created successfully.",
+            "description": "Heat map created successfully, returns an upload link.",
             "content": {
                 "application/json": {
                     "example": {
-                        "details": "heat map created successfully",
+                        "upload_link": "https://example.com/upload/heatmap.mp4"
                     }
                 }
             }
