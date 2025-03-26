@@ -73,3 +73,13 @@ class CreateHeatMapInDTO:
 class CreateHeatMapOutDTO:
     upload_link: str
 
+
+@dataclass(slots=True)
+class GetVideoUnloadLinkInDto:
+    video_name: str
+
+
+@dataclass(slots=True)
+class GetVideoUnloadLinkDTO:
+    unload_link: str
+

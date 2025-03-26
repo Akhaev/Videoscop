@@ -144,6 +144,9 @@ class CreateVideoInteractor:
         uuid = str(self.uuid_generator())
         author_uuid = self.auth.get_current_user()
         
+        if author_uuid is None:
+            raise exceptions.UnauthorizedError()
+        
         self.validator.validate(video_dto)
         
         video_entity = entities.Video(
@@ -201,5 +204,23 @@ class CreateHeatMapInteractor:
         upload_link = await self.file_storage.get_upload_link(heatmap_dto.video_name)
         return dto.CreateHeatMapOutDTO(upload_link=upload_link)
 
-
+class GetVideoUnloadLinkInteractor:
+    def __init__(self, file_storage: interfaces.GetFileUnloadLink,
+                 auth: interfaces.AuthCurrentUserGetter,
+                 repository: interfaces.VideoGetter) -> None:
+        self.file_storage = file_storage
+        self.auth = auth
+        self.repository = repository
+        
+    async def __call__(self, video_name: dto.GetVideoUnloadLinkInDto) -> dto.GetVideoUnloadLinkOutDTO:
+        user_uuid = self.auth.get_current_user()
+        
+        if user_uuid is None:
+            raise exceptions.UnauthorizedError()
+        
+        video = await self.repository.get_by_author_and_name(user_uuid, video_name)
+        
+        unload_link = await self.file_storage.get_unload_link(video_name)
+        
+        return dto.GetVideoUnloadLinkOutDTO(unload_link=unload_link)
 

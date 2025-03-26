@@ -87,6 +87,11 @@ class GetFileUploadLink(Protocol):
     def get_upload_link(self, file_name: str) -> str:
         pass
 
+class GetFileUnloadLink(Protocol):
+    @abstractmethod
+    def get_unload_link(self, file_name: str) -> str:
+        pass
+
 class HeatMapCreater(Protocol):
     @abstractmethod
     def create(self, heat_map: entities.HeatMap) -> None:
