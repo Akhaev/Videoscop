@@ -1,5 +1,4 @@
 from os import environ as env
-
 from pydantic import Field, BaseModel
 
 class PostgresConfig(BaseModel):
@@ -16,7 +15,15 @@ class JWTConfig(BaseModel):
     secret_key: str = Field(default='default')
     expiration_days: int = Field(default=30)
 
+class MinioConfig(BaseModel):
+    login: str = Field(alias='MINIO_USER', default='minio')
+    password: str = Field(alias='MINIO_PASSWORD', default='password')
+    host: str = Field(alias='MINIO_HOST', default='127.0.0.1')
+    port: int = Field(alias='MINIO_PORT', default='9000')
+    expiration_days: int = Field(default=30)
+
 class Config(BaseModel):
     postgres: PostgresConfig = Field(default_factory=lambda: PostgresConfig(**env))
     fastapi: FastApiConfig = Field(default_factory=lambda: FastApiConfig(**env))
-    jwtconfig: JWTConfig = Field(default_factory=lambda: JWTConfig(**env))
+    jwt: JWTConfig = Field(default_factory=lambda: JWTConfig(**env))
+    minio: MinioConfig = Field(default_factory=lambda: MinioConfig(**env))

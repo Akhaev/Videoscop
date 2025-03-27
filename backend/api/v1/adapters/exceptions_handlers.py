@@ -5,7 +5,7 @@ import jwt
 from application.exceptions import UnAuthorizedError, ValidationError as AppValidationError
 from infrastructure.db.exceptions import RecordDontExistsError
 from sqlalchemy.exc import IntegrityError
-
+from infrastructure.file_storage.exceptions import NotFoundFileError, AlreadyExistsFileError
 # Этот хендлер срабатывает, когда возникает ошибка валидации данных.
 async def validation_exception_handler(request: Request, exc: AppValidationError | exceptions.RequestValidationError) -> JSONResponse:
     problem_fields = {error["loc"][-1]: error["msg"] for error in exc.errors()}
@@ -22,11 +22,9 @@ async def validation_exception_handler(request: Request, exc: AppValidationError
 
 # Этот хендлер срабатывает, когда возникает ошибка уникальности данных в базе данных.
 async def integrity_error_handler(request: Request, exc: IntegrityError) -> JSONResponse:
-    # Извлекаем информацию о нарушении уникальности или внешнего ключа
     detail = str(exc.orig)
     problem_fields = {}
 
-    # Обработка ошибок уникальности
     if "uq_user_login" in detail:
         problem_fields["login"] = "already exists"
     elif "uq_user_email" in detail:
@@ -35,13 +33,11 @@ async def integrity_error_handler(request: Request, exc: IntegrityError) -> JSON
         problem_fields["name"] = "already exists for this author"
     elif "uq_heat_map_video" in detail:
         problem_fields["video"] = "already has a heat map"
-    # Обработка ошибок внешнего ключа
-    elif 'fk_video_author' in detail:
-        problem_fields["author"] = "author does not exist"
-    elif 'fk_heat_map_video' in detail:
-        problem_fields["video"] = "video does not exist"
+    # elif 'fk_video_author' in detail:
+    #     problem_fields["author"] = "author does not exist"
+    # elif 'fk_heat_map_video' in detail:
+    #     problem_fields["video"] = "video does not exist"
     else:
-        # Если ошибка не связана с уникальностью или внешним ключом, рерайзим её
         raise exc
 
     error_message = {
@@ -89,6 +85,24 @@ async def record_not_found_handler(request: Request, exc: RecordDontExistsError)
         content={"message": str(exc)},
     )
 
+async def file_not_found_handler(request: Request, exc: NotFoundFileError) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"message": str(exc)},
+    )
+
+async def file_already_exists_handler(request: Request, exc: AlreadyExistsFileError) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"message": str(exc)},
+    )
+
+async def default_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"message": "Internal server error"},
+    )
+
 all_handlers = { 
     IntegrityError: integrity_error_handler,
     jwt.ExpiredSignatureError: expired_token_handler,
@@ -97,5 +111,8 @@ all_handlers = {
     AppValidationError: validation_exception_handler,
     exceptions.RequestValidationError: validation_exception_handler,
     ValueError: value_error_handler,
-    RecordDontExistsError: record_not_found_handler
+    RecordDontExistsError: record_not_found_handler,
+    NotFoundFileError: file_not_found_handler,
+    AlreadyExistsFileError: file_already_exists_handler,
+    Exception: default_exception_handler,
 }

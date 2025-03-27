@@ -268,6 +268,44 @@ video_responses = {
                 }
             }
         }
+    },
+    'get_unload_link': {
+        200: {
+            "description": "Successful completion of the request.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "unload_link": "https://example.com/unload/video.mp4"
+                    }
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized: User authentication failed.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "Authorization token is missing or improperly formatted"
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Not Found: The authenticated user was not found or video with this name not found.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "User not found",
+                    },
+                    "example": {
+                        "message": "Video not found",
+                    },
+                    "example": {
+                        "message": "File 'video_name' dont exists" ,
+                    }
+                }
+            }
+        },
     }
 }
 
@@ -307,14 +345,14 @@ heat_map_responses = {
             }
         },
         404: {
-            "description": "Not Found: The authenticated user was not found or video with this name not found.",
+            "description": "Not Found: The authenticated user was not found or video with this name dont loaded or dont created.",
             "content": {
                 "application/json": {
                     "example": {
                         "message": "User not found",
                     },
                     "example": {
-                        "message": "video with this not found",
+                        "message": "Video not found",
                     }
                 }
             }
@@ -331,6 +369,58 @@ heat_map_responses = {
                     }
                 }
             }
+        },
+        409: {
+            "description": "Conflict: A heat map with the same name already exists for this video.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "Conflict field/fields",
+                        "problem_fields": {
+                            "name": "already exists for this video"
+                        }
+                    }
+                }
+            }
         }
+    
+    },
+    'get_unload_link': {
+        200: {
+            "description": "Successful completion of the request.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "unload_link": "https://example.com/unload/heatmap.mp4"
+                    }
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized: User authentication failed.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "Authorization token is missing or improperly formatted"
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Not Found: The authenticated user was not found or heatmap for video with this name dont loaded or dont created.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "User not found",
+                    },
+                    "example": {
+                        "message": "Video not found",
+                    },
+                    "example": {
+                        "message": "File 'video_name' dont exists" ,
+                    }
+                }
+            }
+        },
     }
 }

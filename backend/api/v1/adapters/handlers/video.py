@@ -43,3 +43,16 @@ async def create_video(video: CreateVideoIn, interactor: FromDishka[CreateVideoI
     ))
     return CreateVideoOut(upload_link=result.upload_link)
 
+@router.get('/unload_link/{video_name}',
+            status_code=status.HTTP_200_OK,
+            description='Get video unload link',
+            responses={
+                status.HTTP_200_OK: video_responses['get_unload_link'][200],
+                status.HTTP_401_UNAUTHORIZED: common_responses[401],
+                status.HTTP_404_NOT_FOUND: video_responses['get_unload_link'][404],
+            })
+async def get_video_unload_link(data: Annotated[SearchVideoIn, Query()], interactor: FromDishka[CreateVideoInteractor]) -> SearchVideoOut:
+    result = await interactor(dto.GetVideoUnloadLinkInDTO(
+        video_name=data.video_name
+    ))
+    return SearchVideoOut(upload_link=result.upload_link)

@@ -169,3 +169,31 @@ class CreateHeatMapOut(BaseModel):
         title="Upload link for the heatmap",
         description="A link to upload the heatmap."
     )
+    
+class GetHeatMapUnloadLinkIn(BaseModel):
+    video_name: str = Field(
+        title="Name of the video",
+        description="The name of the video for which the heatmap is being getted. Must be between 3 and 50 characters.",
+        min_length=3,
+        max_length=50
+    ) 
+    
+class GetHeatMapUnloadLinkOut(BaseModel):
+    unload_link: str = Field(
+        title="Unload link for the heatmap",
+        description="A link to unload the heatmap."
+    )
+
+class GetVideoUnloadLinkIn(BaseModel):
+    video_name: str = Field(
+        title="Name of the video",
+        description="The name of the video for which the unload link is being getted. Must be between 3 and 50 characters.",
+        min_length=3,
+        max_length=50
+    )
+    
+class GetVideoUnloadLinkOut(BaseModel):
+    unload_link: str = Field(
+        title="Unload link for the video",
+        description="A link to unload the video."
+    )

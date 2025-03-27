@@ -3,7 +3,6 @@ from sqlalchemy import select, update, text
 from application import interfaces
 from domen import entities
 from . import models
-from asyncpg import UniqueViolationError
 import hashlib
 from sqlalchemy import Column
 from typing import Any, Tuple
@@ -15,7 +14,8 @@ def Sha512Hash(text: str) -> str:
     hashed_password = hashlib.sha512(text.encode('utf-8')).hexdigest()
     return hashed_password
 
-class UserRepository(interfaces.UserCreater, interfaces.UserUpdater):
+class UserRepository(interfaces.UserCreater, interfaces.UserUpdater, 
+                     interfaces.UserDeletter, interfaces.UserGetter):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
@@ -49,21 +49,22 @@ class UserRepository(interfaces.UserCreater, interfaces.UserUpdater):
         ]
         return True, existing_fields
 
-    async def get_by_uuid(self, user_uuid: str) -> models.User:  # Изменено с get_by_id на get_by_uuid
+    async def get_by_uuid(self, user_uuid: str) -> models.User:
         user = await self.session.get(models.User, user_uuid)
         if user is None:
             raise exceptions.RecordDontExistsError('User not found')
         return user
 
     async def get(self, user_uuid: str) -> entities.User:
-        user = await self.get_by_uuid(user_uuid)  # Изменено с get_by_id на get_by_uuid
+        user = await self.get_by_uuid(user_uuid) 
         return entities.User(uuid=user.uuid, login=user.login, email=user.email, password=user.password)
 
     async def delete(self, user_uuid: str) -> None:
-        user = await self.get_by_uuid(user_uuid)  # Изменено с get_by_id на get_by_uuid
+        user = await self.get_by_uuid(user_uuid) 
         await self.session.delete(user)
     
-class VideoRepository(interfaces.UserVideoSearcher):
+class VideoRepository(interfaces.UserVideoSearcher, 
+                      interfaces.VideoCreater, interfaces.VideoGetter):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
     
@@ -159,10 +160,28 @@ class VideoRepository(interfaces.UserVideoSearcher):
 
         return {'videos': videos, 'cursor': cursor}
     
-class HeatMapRepository(interfaces.HeatMapCreater):
+class HeatMapRepository(interfaces.HeatMapCreater, 
+                        interfaces.HeatMapCreater, interfaces.HeatMapGetter):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
     
     async def create(self, heat_map: entities.HeatMap) -> None:
         heat_map = models.HeatMap(uuid=heat_map.uuid, video_uuid=heat_map.video_uuid)
         self.session.add(heat_map)
+        
+    async def get_by_author_and_name(self, author_uuid: str, video_name: str) -> entities.HeatMap:
+
+        
+        video = await VideoRepository(self.session).get_by_author_and_name(author_uuid, video_name)
+        
+        heat_map = await self.session.execute(
+            select(models.HeatMap).where(
+                models.HeatMap.video_uuid == video.uuid
+            )
+        )
+        heat_map = heat_map.scalar_one_or_none()
+        
+        if heat_map is None:
+            raise exceptions.RecordDontExistsError('Heat map not found')
+        
+        return entities.HeatMap(uuid=heat_map.uuid, video_uuid=video.uuid)

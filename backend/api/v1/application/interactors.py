@@ -162,7 +162,7 @@ class CreateVideoInteractor:
         
         await self.db_session.commit()
         
-        upload_link = await self.file_storage.get_upload_link(video_dto.name)
+        upload_link = await self.file_storage.get_upload_link(file_type='video', file_name=video_dto.name)
         
         return dto.CreateVideoOutDTO(upload_link=upload_link)
 
@@ -201,7 +201,7 @@ class CreateHeatMapInteractor:
         await self.repository.create(heat_map_entity)
         await self.db_session.commit()
         
-        upload_link = await self.file_storage.get_upload_link(heatmap_dto.video_name)
+        upload_link = await self.file_storage.get_upload_link(file_type='heatmap',file_name=heatmap_dto.video_name)
         return dto.CreateHeatMapOutDTO(upload_link=upload_link)
 
 class GetVideoUnloadLinkInteractor:
@@ -212,15 +212,35 @@ class GetVideoUnloadLinkInteractor:
         self.auth = auth
         self.repository = repository
         
-    async def __call__(self, video_name: dto.GetVideoUnloadLinkInDto) -> dto.GetVideoUnloadLinkOutDTO:
+    async def __call__(self, video_dto: dto.GetVideoUnloadLinkInDto) -> dto.GetVideoUnloadLinkOutDTO:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
             raise exceptions.UnauthorizedError()
         
-        video = await self.repository.get_by_author_and_name(user_uuid, video_name)
+        _ = await self.repository.get_by_author_and_name(user_uuid, video_dto.video_name)
         
-        unload_link = await self.file_storage.get_unload_link(video_name)
+        unload_link = await self.file_storage.get_unload_link(file_type='video', file_name=video_dto.video_name)
+        
+        return dto.GetVideoUnloadLinkOutDTO(unload_link=unload_link)
+    
+class GetHeatMapUnloadLinkInteractor:
+    def __init__(self, file_storage: interfaces.GetFileUnloadLink,
+                 auth: interfaces.AuthCurrentUserGetter,
+                 repository: interfaces.HeatMapGetter) -> None:
+        self.file_storage = file_storage
+        self.auth = auth
+        self.repository = repository
+        
+    async def __call__(self, heatmap_dto: dto.GetHeatMapUnloadLinkInDto) -> dto.GetHeatMapUnloadLinkOutDTO:
+        user_uuid = self.auth.get_current_user()
+        
+        if user_uuid is None:
+            raise exceptions.UnauthorizedError()
+        
+        _ = await self.repository.get_by_author_and_name(user_uuid, heatmap_dto.video_name)
+        
+        unload_link = await self.file_storage.get_unload_link(file_type='heatmap', file_name=heatmap_dto.video_name)
         
         return dto.GetVideoUnloadLinkOutDTO(unload_link=unload_link)
 

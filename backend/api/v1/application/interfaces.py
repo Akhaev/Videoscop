@@ -5,8 +5,12 @@ from uuid import UUID
 from typing import NewType
 import datetime
 from application import dto
-
+from enum import Enum
 Token = NewType('Token', str)
+
+class Tag(Enum):
+    video = 'video'
+    heat_map = 'heatmap'
 
 class UserCreater(Protocol):
     @abstractmethod
@@ -84,12 +88,12 @@ class CreateVideoValidator(Protocol):
 
 class GetFileUploadLink(Protocol):
     @abstractmethod
-    def get_upload_link(self, file_name: str) -> str:
+    def get_upload_link(self, file_type: Tag.video | Tag.heat_map, file_name: str) -> str:
         pass
 
 class GetFileUnloadLink(Protocol):
     @abstractmethod
-    def get_unload_link(self, file_name: str) -> str:
+    def get_unload_link(self, file_type: Tag.video | Tag.heat_map, file_name: str) -> str:
         pass
 
 class HeatMapCreater(Protocol):
@@ -100,4 +104,9 @@ class HeatMapCreater(Protocol):
 class CreateHeatMapValidator(Protocol):
     @abstractmethod
     def validate(self, video_name: dto.CreateHeatMapInDTO) -> None:
+        pass
+    
+class HeatMapGetter(Protocol):
+    @abstractmethod
+    def get_by_author_and_name(self, author_uuid: str, video_name: str) -> entities.HeatMap:
         pass
