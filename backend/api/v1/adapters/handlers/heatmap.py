@@ -1,12 +1,12 @@
 from fastapi import APIRouter, status, Query
 from typing import Annotated
 from dishka.integrations.fastapi import FromDishka, DishkaRoute
-from application.interactors import CreateHeatMapInteractor
+from application.interactors import CreateHeatMapInteractor, GetHeatMapUnloadLinkInteractor
 from ..schemas import CreateHeatMapIn, CreateHeatMapOut, GetHeatMapUnloadLinkIn, GetHeatMapUnloadLinkOut
 from ..responses_descriptions import common_responses, heat_map_responses
 from application import dto
 
-router = APIRouter(prefix='/user/videos/heatmap', tags=['HeatMap'], route_class=DishkaRoute)
+router = APIRouter(prefix='/users/me/videos/heatmap', tags=['HeatMap'], route_class=DishkaRoute)
 
 @router.post('',
              status_code=status.HTTP_201_CREATED,
@@ -24,7 +24,7 @@ async def create_heatmap(data: CreateHeatMapIn, interactor: FromDishka[CreateHea
     ))
     return CreateHeatMapOut(upload_link=result.upload_link)
 
-@router.get('/unload_link/{video_name}',
+@router.get('/unload_link',
              status_code=status.HTTP_200_OK,
              description='Get heatmap unload link',
              responses={
@@ -32,8 +32,8 @@ async def create_heatmap(data: CreateHeatMapIn, interactor: FromDishka[CreateHea
                  status.HTTP_401_UNAUTHORIZED: common_responses[401],
                  status.HTTP_404_NOT_FOUND: heat_map_responses['get_unload_link'][404],
              })
-async def get_heatmap_unload_link(data: Annotated[GetHeatMapUnloadLinkIn, Query()], interactor: FromDishka[CreateHeatMapInteractor]) -> GetHeatMapUnloadLinkOut:
+async def get_heatmap_unload_link(data: Annotated[GetHeatMapUnloadLinkIn, Query()], interactor: FromDishka[GetHeatMapUnloadLinkInteractor]) -> GetHeatMapUnloadLinkOut:
     result = await interactor(dto.GetHeatMapUnloadLinkInDto(
         video_name=data.video_name
     ))
-    return GetHeatMapUnloadLinkOut(unload_link=result.upload_link)
+    return GetHeatMapUnloadLinkOut(unload_link=result.unload_link)

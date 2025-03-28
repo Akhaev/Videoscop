@@ -11,28 +11,28 @@ class FileStorage(interfaces.GetFileUploadLink, interfaces.GetFileUnloadLink):
         self.client = client
         self.config = config
         
-    async def get_upload_link(self, file_type: interfaces.Tag, filename: str) -> str:
+    async def get_upload_link(self, file_type: interfaces.Tag, file_name: str) -> str:
         try:
-            self.client.stat_object(file_type, filename)
-            raise AlreadyExistsFileError(filename)
+            self.client.stat_object(file_type, file_name)
+            raise AlreadyExistsFileError(file_name)
         except S3Error as e:
             if e.code != "NoSuchKey":
                 raise e
         
         url = self.client.presigned_put_object(
-            file_type, filename, expires=timedelta(hours=self.config.expiration_days),
+            file_type, file_name, expires=timedelta(hours=self.config.expiration_days),
         )
         return url
     
-    async def get_unload_link(self, file_type: interfaces.Tag, filename: str) -> str:
+    async def get_unload_link(self, file_type: interfaces.Tag, file_name: str) -> str:
         try:
-            self.client.stat_object(file_type, filename)
+            self.client.stat_object(file_type, file_name)
         except S3Error as e:
             if e.code == "NoSuchKey":
-                raise NotFoundFileError(filename)
+                raise NotFoundFileError(file_name)
             raise e
         
         url = self.client.presigned_get_object(
-            file_type, filename, expires=timedelta(hours=self.config.expiration_days),
+            file_type, file_name, expires=timedelta(hours=self.config.expiration_days),
         )
         return url

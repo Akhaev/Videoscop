@@ -185,7 +185,7 @@ class GetHeatMapUnloadLinkOut(BaseModel):
     )
 
 class GetVideoUnloadLinkIn(BaseModel):
-    video_name: str = Field(
+    name: str = Field(
         title="Name of the video",
         description="The name of the video for which the unload link is being getted. Must be between 3 and 50 characters.",
         min_length=3,

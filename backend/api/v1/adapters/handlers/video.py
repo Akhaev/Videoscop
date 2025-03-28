@@ -1,12 +1,12 @@
 from fastapi import APIRouter, status, Query
 from typing import Annotated
 from dishka.integrations.fastapi import FromDishka, DishkaRoute
-from application.interactors import SearchUserVideosInteractor, CreateVideoInteractor
-from ..schemas import SearchVideoOut, SearchVideoIn, CreateVideoIn, CreateVideoOut
+from application.interactors import SearchUserVideosInteractor, CreateVideoInteractor, GetVideoUnloadLinkInteractor
+from ..schemas import SearchVideoOut, SearchVideoIn, CreateVideoIn, CreateVideoOut, GetVideoUnloadLinkIn, GetVideoUnloadLinkOut
 from ..responses_descriptions import common_responses, video_responses
 from application import dto
 
-router = APIRouter(prefix='/user/videos', tags=['Video'], route_class=DishkaRoute)
+router = APIRouter(prefix='/users/me/videos', tags=['Video'], route_class=DishkaRoute)
 
 @router.get('/search',
             status_code=status.HTTP_200_OK,
@@ -44,7 +44,7 @@ async def create_video(video: CreateVideoIn, interactor: FromDishka[CreateVideoI
     ))
     return CreateVideoOut(upload_link=result.upload_link)
 
-@router.get('/unload_link/{video_name}',
+@router.get('/unload_link',
             status_code=status.HTTP_200_OK,
             description='Get video unload link',
             responses={
@@ -53,8 +53,8 @@ async def create_video(video: CreateVideoIn, interactor: FromDishka[CreateVideoI
                 status.HTTP_404_NOT_FOUND: video_responses['get_unload_link'][404],
                 status.HTTP_422_UNPROCESSABLE_ENTITY: video_responses['get_unload_link'][422]
             })
-async def get_video_unload_link(data: Annotated[SearchVideoIn, Query()], interactor: FromDishka[CreateVideoInteractor]) -> SearchVideoOut:
-    result = await interactor(dto.GetVideoUnloadLinkInDTO(
-        video_name=data.video_name
+async def get_video_unload_link(data: Annotated[GetVideoUnloadLinkIn, Query()], interactor: FromDishka[GetVideoUnloadLinkInteractor]) -> GetVideoUnloadLinkOut:
+    result = await interactor(dto.GetVideoUnloadLinkInDto(
+        video_name=data.name
     ))
-    return SearchVideoOut(upload_link=result.upload_link)
+    return GetVideoUnloadLinkOut(unload_link=result.unload_link)

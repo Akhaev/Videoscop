@@ -22,7 +22,7 @@ async def create_user(user: CreateUserIn, interactor: FromDishka[CreateUserInter
     return CreateUserOut(token=result.token)
 
 
-@router.put('', status_code=status.HTTP_200_OK, name='Update user', 
+@router.put('/me', status_code=status.HTTP_200_OK, name='Update user', 
             summary='Updates an existing user',
             responses={status.HTTP_422_UNPROCESSABLE_ENTITY: user_responses['update'][422], 
                        status.HTTP_409_CONFLICT: user_responses['update'][409],
@@ -41,7 +41,7 @@ async def update_user(user: UpdateUserIn, interactor: FromDishka[UpdateUserInter
     return UpdateUserOut(message="User updated successfully")
 
 
-@router.get('', status_code=status.HTTP_200_OK, name='Get user', 
+@router.get('/me', status_code=status.HTTP_200_OK, name='Get user', 
             summary='Returns the user data',
             responses={status.HTTP_404_NOT_FOUND: user_responses['get'][404],
                        status.HTTP_401_UNAUTHORIZED: common_responses[401],
@@ -52,7 +52,7 @@ async def get_user(interactor: FromDishka[GetUserInteractor]) -> GetUserOut:
     return GetUserOut(login=result.login, email=result.email)
 
 
-@router.delete('', status_code=status.HTTP_200_OK, name='Delete user', 
+@router.delete('/me', status_code=status.HTTP_200_OK, name='Delete user', 
                summary='Deletes the user',
                responses={status.HTTP_404_NOT_FOUND: user_responses['delete'][404],
                           status.HTTP_401_UNAUTHORIZED: common_responses[401],

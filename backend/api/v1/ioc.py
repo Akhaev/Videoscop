@@ -31,7 +31,7 @@ class FastApiApp(Provider):
     @provide(scope=Scope.APP)
     async def get_minio_client(self, config: Config) -> Minio:
         minio_client = Minio(
-            config.minio.host,
+            config.minio.host + ':' + str(config.minio.port),
             access_key=config.minio.login,
             secret_key=config.minio.password,
             secure=False
