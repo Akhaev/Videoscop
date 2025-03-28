@@ -2,7 +2,9 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 from faker import Faker
-
+import jwt
+from unittest.mock import patch
+from datetime import datetime, timedelta
 client = TestClient(app)
 faker = Faker()
 
@@ -60,6 +62,12 @@ def test_full_flow(user_data, updated_user_data, video_data):
     log_response("Создание пользователя с некорректными данными", create_user_invalid_response, invalid_user_data)
     assert create_user_invalid_response.status_code == 422
 
+    # Проверка ошибки 401 при отсутствии токена
+    unauthorized_response = client.get("/users")
+    log_response("Создание пользователя без токена", unauthorized_response)
+    assert unauthorized_response.status_code == 401
+    assert unauthorized_response.json()["message"] == "Authorization token is missing or improperly formatted"
+
     # 2. Редактирование пользователя
     update_user_response = client.put("/users", json={**updated_user_data, 'current_password': user_data['password']}, headers=headers)
     log_response("Редактирование пользователя", update_user_response, {**updated_user_data, 'current_password': user_data['password']})
@@ -88,6 +96,21 @@ def test_full_flow(user_data, updated_user_data, video_data):
     get_user_invalid_token_response = client.get("/users", headers=invalid_headers)
     log_response("Получение данных с некорректным токеном", get_user_invalid_token_response)
     assert get_user_invalid_token_response.status_code == 401
+
+    # Проверка ошибки 401 при использовании истекшего токена
+    now = datetime.now()
+    payload = {
+        "sub": "user_id",
+        "exp": now - timedelta(days=1),  # Set expiration to 1 day from now
+        "nbf": now,  # Token not valid before now
+        "iat": now   # Issued at current time
+    }
+    expired_token = jwt.encode(payload, "default", algorithm="HS256")
+    expired_headers = {"Authorization": f"Bearer {expired_token}"}
+    expired_token_response = client.get("/users", headers=expired_headers)
+    log_response("Получение данных с истекшим токеном", expired_token_response)
+    assert expired_token_response.status_code == 401
+    assert expired_token_response.json()["message"] == "Token has expired"
 
     # 4. Создание видео
     create_video_response = client.post("/user/videos", json=video_data, headers=headers)
@@ -144,7 +167,40 @@ def test_full_flow(user_data, updated_user_data, video_data):
     log_response("Поиск видео с некорректными параметрами", search_video_invalid_response, invalid_search_params)
     assert search_video_invalid_response.status_code == 422
 
-    # 7. Удаление пользователя
+    # 7. Получение ссылки на скачивание видео
+    get_unload_link_response = client.get(f"/user/videos/unload_link/{video_data['name']}", headers=headers)
+    log_response("Получение ссылки на скачивание видео", get_unload_link_response)
+    assert get_unload_link_response.status_code == 200
+    assert "unload_link" in get_unload_link_response.json()
+
+    # Ошибка: видео не найдено
+    invalid_video_name = "non_existent_video"
+    get_unload_link_not_found_response = client.get(f"/user/videos/unload_link/{invalid_video_name}", headers=headers)
+    log_response("Получение ссылки на несуществующее видео", get_unload_link_not_found_response)
+    assert get_unload_link_not_found_response.status_code == 404
+
+    # Ошибка: пользователь не авторизован
+    get_unload_link_unauthorized_response = client.get(f"/user/videos/unload_link/{video_data['name']}")
+    log_response("Получение ссылки без авторизации", get_unload_link_unauthorized_response)
+    assert get_unload_link_unauthorized_response.status_code == 401
+
+    # 8. Получение ссылки на скачивание тепловой карты
+    get_heatmap_unload_link_response = client.get(f"/user/videos/heatmap/unload_link/{video_data['name']}", headers=headers)
+    log_response("Получение ссылки на скачивание тепловой карты", get_heatmap_unload_link_response)
+    assert get_heatmap_unload_link_response.status_code == 200
+    assert "unload_link" in get_heatmap_unload_link_response.json()
+
+    # Ошибка: тепловая карта не найдена
+    get_heatmap_unload_link_not_found_response = client.get(f"/user/videos/heatmap/unload_link/{invalid_video_name}", headers=headers)
+    log_response("Получение ссылки на несуществующую тепловую карту", get_heatmap_unload_link_not_found_response)
+    assert get_heatmap_unload_link_not_found_response.status_code == 404
+
+    # Ошибка: пользователь не авторизован
+    get_heatmap_unload_link_unauthorized_response = client.get(f"/user/videos/heatmap/unload_link/{video_data['name']}")
+    log_response("Получение ссылки на тепловую карту без авторизации", get_heatmap_unload_link_unauthorized_response)
+    assert get_heatmap_unload_link_unauthorized_response.status_code == 401
+
+    # 9. Удаление пользователя
     delete_user_response = client.delete("/users", headers=headers)
     log_response("Удаление пользователя", delete_user_response)
     assert delete_user_response.status_code == 200
@@ -154,7 +210,62 @@ def test_full_flow(user_data, updated_user_data, video_data):
     log_response("Повторное удаление пользователя", delete_user_again_response)
     assert delete_user_again_response.status_code == 404
 
-    # 8. Проверка, что пользователь удален
+    # 10. Проверка, что пользователь удален
     get_user_after_delete_response = client.get("/users", headers=headers)
     log_response("Проверка удаления пользователя", get_user_after_delete_response)
     assert get_user_after_delete_response.status_code == 404
+
+    # Проверка ошибки 500 (Internal Server Error)
+    with patch("main.app.include_router", side_effect=Exception("Unexpected error")):
+        internal_server_error_response = client.get("/users")
+        log_response("Internal Server Error", internal_server_error_response)
+        assert internal_server_error_response.status_code == 500
+        assert internal_server_error_response.json()["message"] == "Internal server error"
+
+    # Проверка ошибки 401 при использовании истекшего токена
+    expired_token = jwt.encode({"sub": "user_id", "exp": 0}, "default", algorithm="HS256")
+    expired_headers = {"Authorization": f"Bearer {expired_token}"}
+    expired_token_response = client.get("/users", headers=expired_headers)
+    log_response("Expired Token", expired_token_response)
+    assert expired_token_response.status_code == 401
+    assert expired_token_response.json()["message"] == "Token has expired"
+
+    # Проверка ошибки 401 при отсутствии токена
+    unauthorized_response = client.get("/users")
+    log_response("Create User Unauthorized", unauthorized_response)
+    assert unauthorized_response.status_code == 401
+    assert unauthorized_response.json()["message"] == "Authorization token is missing or improperly formatted"
+
+    # Проверка ошибки 409 при создании видео с дублирующимся именем
+    create_video_duplicate_response = client.post("/user/videos", json=video_data, headers=headers)
+    log_response("Create Video Conflict", create_video_duplicate_response, video_data)
+    assert create_video_duplicate_response.status_code == 409
+    assert "already exists" in create_video_duplicate_response.json()["message"]
+
+    # Проверка ошибки 404 при запросе тепловой карты для несуществующего видео
+    heatmap_not_found_response = client.get("/user/videos/heatmap/unload_link/non_existent_video", headers=headers)
+    log_response("Heatmap Not Found", heatmap_not_found_response)
+    assert heatmap_not_found_response.status_code == 404
+    assert heatmap_not_found_response.json()["message"] == "Heatmap not found"
+
+    # Проверка ошибки 401 при использовании недействительного токена
+    invalid_headers = {"Authorization": "Bearer invalid_token"}
+    invalid_token_response = client.get("/users", headers=invalid_headers)
+    log_response("Invalid Token", invalid_token_response)
+    assert invalid_token_response.status_code == 401
+    assert invalid_token_response.json()["message"] == "Invalid token"
+
+    # Проверка ошибки 404 при запросе несуществующего файла
+    file_not_found_response = client.get("/user/videos/unload_link/non_existent_file", headers=headers)
+    log_response("File Not Found", file_not_found_response)
+    assert file_not_found_response.status_code == 404
+    assert "dont exists" in file_not_found_response.json()["message"]
+
+    # Проверка ошибки 409 при повторной загрузке файла
+    file_already_exists_response = client.post("/user/videos", json=video_data, headers=headers)
+    log_response("File Already Exists", file_already_exists_response, video_data)
+    assert file_already_exists_response.status_code == 409
+    assert "already exists" in file_already_exists_response.json()["message"]
+
+
+

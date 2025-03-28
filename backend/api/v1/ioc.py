@@ -13,7 +13,7 @@ from application.interactors import (CreateUserInteractor, UpdateUserInteractor,
 from uuid import uuid4
 from application import validators
 from infrastructure.auth import auth
-from infrastructure.file_storage.file_storage import FIleStorage
+from infrastructure.file_storage import file_storage
 from minio import Minio
 
 class FastApiApp(Provider):
@@ -60,11 +60,14 @@ class FastApiApp(Provider):
     search_user_videos_validator = provide(validators.SearchUserVideosValidator, scope=Scope.APP, provides=AnyOf[interfaces.SearchUserVideosValidator])
     create_video_validator = provide(validators.CreateVideoValidator, scope=Scope.APP, provides=AnyOf[interfaces.CreateVideoValidator])
     create_heat_map_validator = provide(validators.CreateHeatMapValidator, scope=Scope.APP, provides=AnyOf[interfaces.CreateHeatMapValidator])
+    get_video_unload_link_validator = provide(validators.GetVideoUnloadLinkValidator, scope=Scope.APP, provides=AnyOf[interfaces.GetVideoUnloadLinkValidator])
+    get_heat_map_unload_link_validator = provide(validators.GetHeatMapUnloadLinkValidator, scope=Scope.APP, provides=AnyOf[interfaces.GetHeatMapUnloadLinkValidator])
+
 
     create_user_authAdd = provide(auth.Auth, scope=Scope.REQUEST, provides=AnyOf[interfaces.AuthAdder])
     update_user_authCurrentUserGetter = provide(auth.Auth, scope=Scope.REQUEST, provides=AnyOf[interfaces.AuthCurrentUserGetter])
 
-    file_storage = provide(FIleStorage, scope=Scope.REQUEST, provides=AnyOf[interfaces.GetFileUploadLink, interfaces.GetFileUnloadLink])
+    file_storage = provide(file_storage.FileStorage, scope=Scope.REQUEST, provides=AnyOf[interfaces.GetFileUploadLink, interfaces.GetFileUnloadLink])
 
     create_user_interactor = provide(CreateUserInteractor, scope=Scope.REQUEST)
     update_user_interactor = provide(UpdateUserInteractor, scope=Scope.REQUEST)

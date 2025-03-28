@@ -3,7 +3,7 @@ from minio.error import S3Error
 from datetime import timedelta
 from config import MinioConfig
 from application import interfaces
-from exceptions import AlreadyExistsFileError, NotFoundFileError
+from .exceptions import AlreadyExistsFileError, NotFoundFileError
 
 
 class FileStorage(interfaces.GetFileUploadLink, interfaces.GetFileUnloadLink):
@@ -11,7 +11,7 @@ class FileStorage(interfaces.GetFileUploadLink, interfaces.GetFileUnloadLink):
         self.client = client
         self.config = config
         
-    async def get_upload_link(self, file_type: interfaces.Tag.video | interfaces.Tag.heat_map, filename: str) -> str:
+    async def get_upload_link(self, file_type: interfaces.Tag, filename: str) -> str:
         try:
             self.client.stat_object(file_type, filename)
             raise AlreadyExistsFileError(filename)
@@ -24,7 +24,7 @@ class FileStorage(interfaces.GetFileUploadLink, interfaces.GetFileUnloadLink):
         )
         return url
     
-    async def get_unload_link(self, file_type: interfaces.Tag.video | interfaces.Tag.heat_map, filename: str) -> str:
+    async def get_unload_link(self, file_type: interfaces.Tag, filename: str) -> str:
         try:
             self.client.stat_object(file_type, filename)
         except S3Error as e:

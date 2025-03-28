@@ -15,7 +15,8 @@ router = APIRouter(prefix='/user/videos/heatmap', tags=['HeatMap'], route_class=
                  status.HTTP_201_CREATED: heat_map_responses['create'][201],
                  status.HTTP_401_UNAUTHORIZED: common_responses[401],
                  status.HTTP_422_UNPROCESSABLE_ENTITY: heat_map_responses['create'][422],
-                 status.HTTP_404_NOT_FOUND: heat_map_responses['create'][404]
+                 status.HTTP_404_NOT_FOUND: heat_map_responses['create'][404],
+                 status.HTTP_409_CONFLICT: heat_map_responses['create'][409],
              })
 async def create_heatmap(data: CreateHeatMapIn, interactor: FromDishka[CreateHeatMapInteractor]) -> CreateHeatMapOut:
     result = await interactor(dto.CreateHeatMapInDTO(

@@ -160,8 +160,7 @@ class VideoRepository(interfaces.UserVideoSearcher,
 
         return {'videos': videos, 'cursor': cursor}
     
-class HeatMapRepository(interfaces.HeatMapCreater, 
-                        interfaces.HeatMapCreater, interfaces.HeatMapGetter):
+class HeatMapRepository(interfaces.HeatMapCreater, interfaces.HeatMapGetter):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
     

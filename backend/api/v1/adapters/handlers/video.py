@@ -33,7 +33,8 @@ async def search_user_video(data: Annotated[SearchVideoIn, Query()], interactor:
                  status.HTTP_201_CREATED: video_responses['create'][201],
                  status.HTTP_401_UNAUTHORIZED: common_responses[401],
                  status.HTTP_422_UNPROCESSABLE_ENTITY: video_responses['create'][422],
-                 status.HTTP_404_NOT_FOUND: video_responses['create'][404]
+                 status.HTTP_404_NOT_FOUND: video_responses['create'][404],
+                 status.HTTP_409_CONFLICT: video_responses['create'][409]
              })
 async def create_video(video: CreateVideoIn, interactor: FromDishka[CreateVideoInteractor]) -> CreateVideoOut:
     result = await interactor(dto.CreateVideoInDTO(
@@ -50,6 +51,7 @@ async def create_video(video: CreateVideoIn, interactor: FromDishka[CreateVideoI
                 status.HTTP_200_OK: video_responses['get_unload_link'][200],
                 status.HTTP_401_UNAUTHORIZED: common_responses[401],
                 status.HTTP_404_NOT_FOUND: video_responses['get_unload_link'][404],
+                status.HTTP_422_UNPROCESSABLE_ENTITY: video_responses['get_unload_link'][422]
             })
 async def get_video_unload_link(data: Annotated[SearchVideoIn, Query()], interactor: FromDishka[CreateVideoInteractor]) -> SearchVideoOut:
     result = await interactor(dto.GetVideoUnloadLinkInDTO(

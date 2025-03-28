@@ -51,7 +51,7 @@ class UpdateUserInteractor:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
-            raise exceptions.UnauthorizedError()
+            raise exceptions.UnAuthorizedError()
         
         if user_dto.current_password is None and (user_dto.email or user_dto.password):
             raise ValueError('requires an up-to-date password to update password or email')
@@ -76,7 +76,7 @@ class GetUserInteractor:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
-            raise exceptions.UnauthorizedError()
+            raise exceptions.UnAuthorizedError()
         
         user_entity = await self.repository.get(user_uuid)
         
@@ -94,7 +94,7 @@ class DeleteUserInteractor:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
-            raise exceptions.UnauthorizedError()
+            raise exceptions.UnAuthorizedError()
         
         await self.repository.delete(user_uuid)
         
@@ -115,7 +115,7 @@ class SearchUserVideosInteractor:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
-            raise exceptions.UnauthorizedError()
+            raise exceptions.UnAuthorizedError()
         
         self.validator.validate(search_dto.count, search_dto.date)
         
@@ -145,7 +145,7 @@ class CreateVideoInteractor:
         author_uuid = self.auth.get_current_user()
         
         if author_uuid is None:
-            raise exceptions.UnauthorizedError()
+            raise exceptions.UnAuthorizedError()
         
         self.validator.validate(video_dto)
         
@@ -189,7 +189,7 @@ class CreateHeatMapInteractor:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
-            raise exceptions.UnauthorizedError()
+            raise exceptions.UnAuthorizedError('User not found')    
         
         video = await self.video_repository.get_by_author_and_name(user_uuid, heatmap_dto.video_name)
         
@@ -207,17 +207,20 @@ class CreateHeatMapInteractor:
 class GetVideoUnloadLinkInteractor:
     def __init__(self, file_storage: interfaces.GetFileUnloadLink,
                  auth: interfaces.AuthCurrentUserGetter,
-                 repository: interfaces.VideoGetter) -> None:
+                 repository: interfaces.VideoGetter,
+                 validator: interfaces.GetVideoUnloadLinkValidator) -> None:
         self.file_storage = file_storage
         self.auth = auth
         self.repository = repository
+        self.validator = validator
         
     async def __call__(self, video_dto: dto.GetVideoUnloadLinkInDto) -> dto.GetVideoUnloadLinkOutDTO:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
-            raise exceptions.UnauthorizedError()
+            raise exceptions.UnAuthorizedError()
         
+        self.validator.validate(video_dto)
         _ = await self.repository.get_by_author_and_name(user_uuid, video_dto.video_name)
         
         unload_link = await self.file_storage.get_unload_link(file_type='video', file_name=video_dto.video_name)
@@ -227,20 +230,23 @@ class GetVideoUnloadLinkInteractor:
 class GetHeatMapUnloadLinkInteractor:
     def __init__(self, file_storage: interfaces.GetFileUnloadLink,
                  auth: interfaces.AuthCurrentUserGetter,
-                 repository: interfaces.HeatMapGetter) -> None:
+                 repository: interfaces.HeatMapGetter,
+                 validator: interfaces.GetHeatMapUnloadLinkValidator) -> None:
         self.file_storage = file_storage
         self.auth = auth
         self.repository = repository
+        self.validator = validator
         
     async def __call__(self, heatmap_dto: dto.GetHeatMapUnloadLinkInDto) -> dto.GetHeatMapUnloadLinkOutDTO:
         user_uuid = self.auth.get_current_user()
         
         if user_uuid is None:
-            raise exceptions.UnauthorizedError()
+            raise exceptions.UnAuthorizedError()
         
+        self.validator.validate(heatmap_dto)
         _ = await self.repository.get_by_author_and_name(user_uuid, heatmap_dto.video_name)
         
         unload_link = await self.file_storage.get_unload_link(file_type='heatmap', file_name=heatmap_dto.video_name)
         
-        return dto.GetVideoUnloadLinkOutDTO(unload_link=unload_link)
+        return dto.GetHeatMapUnloadLinkOutDTO(unload_link=unload_link)
 

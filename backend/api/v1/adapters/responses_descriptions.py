@@ -19,7 +19,7 @@ common_responses = {
                     },
                     "Missing or Malformed Token": {
                         "value": {
-                            "message": "Authorization token is missing or improperly formatted",
+                            "message": "User not found",
                         }
                     }
                 }
@@ -37,7 +37,7 @@ user_responses = {
                     "example": {
                         "message": "conflict field/fields",
                         "problem_fields": {
-                            "email": "exists field",
+                            "email": "already exists",
                         }
                     }
                 }
@@ -76,7 +76,7 @@ user_responses = {
                     "example": {
                         "message": "conflict field/fields",
                         "problem_fields": {
-                            "email": "exists field",
+                            "email": "already exists",
                         }
                     }
                 }
@@ -151,7 +151,7 @@ user_responses = {
     },
     'delete': {
         404: {
-            "description": "Not Found: The authenticated or requested user was not found.",
+            "description": "Not Found: The authenticated user was not found.",
             "content": {
                 "application/json": {
                     "example": {
@@ -180,7 +180,7 @@ video_responses = {
             "content": {
                 "application/json": {
                     "example": {
-                        "videos": "[video1_data, video2_data]",
+                        "videos": "[videos, cursor]",
                     },
                 },
             },
@@ -220,16 +220,7 @@ video_responses = {
                 }
             }
         },
-        401: {
-            "description": "Unauthorized: User authentication failed.",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "message": "Authorization token is missing or improperly formatted"
-                    }
-                }
-            }
-        },
+
         422: {
             "description": "Validation error: some fields contain incorrect data.",
             "content": {
@@ -246,7 +237,7 @@ video_responses = {
             }
         },
         409: {
-            "description": "Conflict: A video with the same name already exists for this author.",
+            "description": "Conflict: A video with the same name already exists for this author or video already uploaded.",
             "content": {
                 "application/json": {
                     "example": {
@@ -254,6 +245,9 @@ video_responses = {
                         "problem_fields": {
                             "name": "already exists for this author"
                         }
+                    },
+                    "example": {
+                        "message": "File 'file_name' already exists",
                     }
                 }
             }
@@ -280,18 +274,9 @@ video_responses = {
                 }
             }
         },
-        401: {
-            "description": "Unauthorized: User authentication failed.",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "message": "Authorization token is missing or improperly formatted"
-                    }
-                }
-            }
-        },
+
         404: {
-            "description": "Not Found: The authenticated user was not found or video with this name not found.",
+            "description": "Not Found: The authenticated user was not found or video dont uploaded or dont created.",
             "content": {
                 "application/json": {
                     "example": {
@@ -304,8 +289,22 @@ video_responses = {
                         "message": "File 'video_name' dont exists" ,
                     }
                 }
+            },
+            },
+        422: {
+            "description": "Validation error: video name is invalid.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "incorrect field/fields",
+                        "problem_fields": {
+                            "video_name": "Name must be between 3 and 50 characters"
+                        }
+                    }
+                }
             }
         },
+        
     }
 }
 
@@ -321,31 +320,23 @@ heat_map_responses = {
                 }
             }
         },
-        401: {
-            "description": "Unauthorized: User authentication failed.",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "message": "Authorization token is missing or improperly formatted"
-                    }
-                }
-            }
-        },
         409: {
-            "description": "Conflict: The video already has a heat map.",
+            "description": "Conflict: The video already has a heat map or heatmap already uploaded.",
             "content": {
                 "application/json": {
                     "example": {
                         "message": "Conflict field/fields",
                         "problem_fields": {
                             "video": "already has a heat map"
-                        }
+                        } }, 
+                    "example": {
+                        "message": "File 'file_name' already exists",
                     }
-                }
+                
             }
-        },
+        }, },
         404: {
-            "description": "Not Found: The authenticated user was not found or video with this name dont loaded or dont created.",
+            "description": "Not Found: The authenticated user was not found or video not found.",
             "content": {
                 "application/json": {
                     "example": {
@@ -370,21 +361,8 @@ heat_map_responses = {
                 }
             }
         },
-        409: {
-            "description": "Conflict: A heat map with the same name already exists for this video.",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "message": "Conflict field/fields",
-                        "problem_fields": {
-                            "name": "already exists for this video"
-                        }
-                    }
-                }
-            }
-        }
-    
-    },
+        },
+
     'get_unload_link': {
         200: {
             "description": "Successful completion of the request.",
@@ -396,18 +374,8 @@ heat_map_responses = {
                 }
             }
         },
-        401: {
-            "description": "Unauthorized: User authentication failed.",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "message": "Authorization token is missing or improperly formatted"
-                    }
-                }
-            }
-        },
         404: {
-            "description": "Not Found: The authenticated user was not found or heatmap for video with this name dont loaded or dont created.",
+            "description": "Not Found: The authenticated user was not found or video not found or heatmap for video dont loaded or dont created.",
             "content": {
                 "application/json": {
                     "example": {
@@ -417,10 +385,27 @@ heat_map_responses = {
                         "message": "Video not found",
                     },
                     "example": {
-                        "message": "File 'video_name' dont exists" ,
+                        "message": "Heatmap not found" ,
+                    },
+                        "example": {
+                            "message": "File 'file_name' dont exists" ,
+                        }
+                    }
+                }
+            },
+        422:
+            {
+                "description": "Validation error: video name is invalid.",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            "message": "incorrect field/fields",
+                            "problem_fields": {
+                                "video_name": "Name must be between 3 and 50 characters"
+                            }
+                        }
                     }
                 }
             }
-        },
+        }
     }
-}

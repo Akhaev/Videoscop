@@ -91,3 +91,23 @@ class CreateHeatMapValidator(interfaces.CreateHeatMapValidator):
 
         if errors:
             raise ValidationError(errors)
+
+class GetVideoUnloadLinkValidator(interfaces.GetVideoUnloadLinkValidator):
+    def validate(self, video_dto: dto.GetVideoUnloadLinkInDto) -> None:
+        errors = []
+
+        if not (3 <= len(video_dto.video_name) <= 50):
+            errors.append(ValidationError.add_error("video_name", "Name must be between 3 and 50 characters"))
+
+        if errors:
+            raise ValidationError(errors)
+
+class GetHeatMapUnloadLinkValidator(interfaces.GetHeatMapUnloadLinkValidator):
+    def validate(self, heatmap_dto: dto.GetHeatMapUnloadLinkInDto) -> None:
+        errors = []
+
+        if not (3 <= len(heatmap_dto.video_name) <= 50):
+            errors.append(ValidationError.add_error("video_name", "Name must be between 3 and 50 characters"))
+
+        if errors:
+            raise ValidationError(errors)
