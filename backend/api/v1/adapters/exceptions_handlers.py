@@ -6,18 +6,19 @@ from application.exceptions import UnAuthorizedError, ValidationError as AppVali
 from infrastructure.db.exceptions import RecordDontExistsError
 from sqlalchemy.exc import IntegrityError
 from infrastructure.file_storage.exceptions import NotFoundFileError, AlreadyExistsFileError
+
 # Этот хендлер срабатывает, когда возникает ошибка валидации данных.
 async def validation_exception_handler(request: Request, exc: AppValidationError | exceptions.RequestValidationError) -> JSONResponse:
     problem_fields = {error["loc"][-1]: error["msg"] for error in exc.errors()}
     
     error_message = {
-        "message": "conflict field/fields",
+        "message": "Conflict field/fields",
         "problem_fields": problem_fields
     }
     
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=json.dumps(error_message)
+        content=error_message
     )
 
 # Этот хендлер срабатывает, когда возникает ошибка уникальности данных в базе данных.
@@ -33,10 +34,6 @@ async def integrity_error_handler(request: Request, exc: IntegrityError) -> JSON
         problem_fields["name"] = "already exists for this author"
     elif "uq_heat_map_video" in detail:
         problem_fields["video"] = "already has a heat map"
-    # elif 'fk_video_author' in detail:
-    #     problem_fields["author"] = "author does not exist"
-    # elif 'fk_heat_map_video' in detail:
-    #     problem_fields["video"] = "video does not exist"
     else:
         raise exc
 
@@ -47,7 +44,7 @@ async def integrity_error_handler(request: Request, exc: IntegrityError) -> JSON
     
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
-        content=json.dumps(error_message)
+        content=error_message
     )
 
 # Этот хендлер срабатывает, когда токен истек.

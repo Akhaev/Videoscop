@@ -22,7 +22,7 @@ class JWTConfig(BaseModel):
     expiration_days: int = Field(default=30)
 
 class MinioConfig(BaseModel):
-    login: str = Field(alias='MINIO_USER', default='ROOTUSER')
+    login: str = Field(alias='MINIO_USER', default='ROOTNAME')
     password: str = Field(alias='MINIO_PASSWORD', default='CHANGEME123')
     host: str = Field(alias='MINIO_HOST', default='127.0.0.1')
     port: int = Field(alias='MINIO_PORT', default='9000')

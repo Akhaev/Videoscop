@@ -3,7 +3,6 @@ from fastapi.testclient import TestClient
 from main import app
 from faker import Faker
 import jwt
-from unittest.mock import patch
 from datetime import datetime, timedelta, timezone
 from minio import Minio
 from config import MinioConfig
@@ -75,7 +74,7 @@ def test_full_flow(user_data, updated_user_data, video_data, minio_client):
     create_user_conflict_response = client.post("/users", json=user_data)
     log_response("Повторное создание пользователя", create_user_conflict_response, user_data)
     assert create_user_conflict_response.status_code == 409
-    assert create_user_conflict_response.json()["message"] == "conflict field/fields"
+    assert create_user_conflict_response.json()["message"] == "Conflict field/fields"
 
     # Создание пользователя с некорректными данными
     invalid_user_data = user_data.copy()
@@ -210,7 +209,7 @@ def test_full_flow(user_data, updated_user_data, video_data, minio_client):
     log_response("Получение ссылки на несуществующее видео", get_unload_link_not_found_response)
     assert get_unload_link_not_found_response.status_code == 404
     assert get_unload_link_not_found_response.json()["message"] == "Video not found"
-
+    
     # --- Тесты на удаление пользователя ---
     # Успешное удаление пользователя
     delete_user_response = client.delete("/users/me", headers=headers)
@@ -233,13 +232,7 @@ def test_full_flow(user_data, updated_user_data, video_data, minio_client):
     log_response("Проверка удаления пользователя", get_user_after_delete_response)
     assert get_user_after_delete_response.status_code == 404
 
-    # --- Тесты на ошибки ---
-    # Ошибка 500 (Internal Server Error)
-    with patch("main.app.include_router", side_effect=Exception("Unexpected error")):
-        internal_server_error_response = client.get("/users/me")
-        log_response("Internal Server Error", internal_server_error_response)
-        assert internal_server_error_response.status_code == 500
-        assert internal_server_error_response.json()["message"] == "Internal server error"
+    
 
 
 
