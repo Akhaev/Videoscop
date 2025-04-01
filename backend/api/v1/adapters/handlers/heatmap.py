@@ -31,6 +31,7 @@ async def create_heatmap(data: CreateHeatMapIn, interactor: FromDishka[CreateHea
                  status.HTTP_200_OK: heat_map_responses['get_unload_link'][200],
                  status.HTTP_401_UNAUTHORIZED: common_responses[401],
                  status.HTTP_404_NOT_FOUND: heat_map_responses['get_unload_link'][404],
+                 status.HTTP_422_UNPROCESSABLE_ENTITY: heat_map_responses['get_unload_link'][422],
              })
 async def get_heatmap_unload_link(data: Annotated[GetHeatMapUnloadLinkIn, Query()], interactor: FromDishka[GetHeatMapUnloadLinkInteractor]) -> GetHeatMapUnloadLinkOut:
     result = await interactor(dto.GetHeatMapUnloadLinkInDto(
