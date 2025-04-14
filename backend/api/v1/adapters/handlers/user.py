@@ -65,7 +65,6 @@ async def delete_user(interactor: FromDishka[DeleteUserInteractor]) -> DeleteUse
 @router.post('/me/token', status_code=status.HTTP_201_CREATED, name='Generate user token', 
              summary='Generates a new authentication token for the user',
              responses={status.HTTP_422_UNPROCESSABLE_ENTITY: user_responses['generate_token'][422], 
-                        status.HTTP_401_UNAUTHORIZED: common_responses[401],
                         status.HTTP_404_NOT_FOUND: user_responses['generate_token'][404],
                         status.HTTP_201_CREATED: user_responses['generate_token'][201]}
              )
