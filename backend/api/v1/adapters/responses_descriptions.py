@@ -219,6 +219,53 @@ user_responses = {
                 }
             }
         }
+    },
+    'generate_token': {
+        201: {
+            "description": "Successful generation of a new token.",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "Success": {
+                            "value": {
+                                "token": "new user token for authentication",
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        422: {
+            "description": "Validation error: some fields contain incorrect data.",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "Invalid password": {
+                            "value": {
+                                "message": "incorrect field/fields",
+                                "problem_fields": {
+                                    "password": "invalid password format"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Not found: password or login dont exists.",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "Password or login dont exists": {
+                            "value": {
+                                "message": "User not found",
+                            }
+                        }
+                    }
+                }
+            }
+        },
     }
 }
 

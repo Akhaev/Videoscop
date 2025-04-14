@@ -120,3 +120,13 @@ class GetHeatMapUnloadLinkValidator(Protocol):
     @abstractmethod
     def validate(self, heatmap_dto: dto.GetHeatMapUnloadLinkInDto) -> None:
         pass
+    
+class UserGetterByLoginPassword(Protocol):
+    @abstractmethod
+    def get_by_login_password(self, login: str, password: str) -> entities.User:
+        pass
+    
+class GenerateUserTokenValidator(Protocol):
+    @abstractmethod
+    def validate(self, user: dto.GenerateUserTokenInDTO) -> None:
+        pass

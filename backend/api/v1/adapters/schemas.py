@@ -197,3 +197,21 @@ class GetVideoUnloadLinkOut(BaseModel):
         title="Unload link for the video",
         description="A link to unload the video."
     )
+    
+class GenerateUserTokenIn(BaseModel):
+    login: str = Field(
+        title="Login of the user",
+        description="The login must be a string between 3 and 50 characters.",
+        min_length=3,
+        max_length=50
+    )
+    password: str = Field(
+        title="Password of the user",
+        description="The password must be at least 8 characters long.",
+        min_length=8
+    )
+class GenerateUserTokenOut(BaseModel):
+    token: str = Field(
+        title="Authentication token",
+        description="A token used for authenticating the user."
+    )

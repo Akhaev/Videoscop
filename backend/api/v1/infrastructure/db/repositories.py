@@ -24,10 +24,26 @@ class UserRepository(interfaces.UserCreater, interfaces.UserUpdater,
         self.session.add(user)
 
     async def update(self, user_uuid: str, update_fields: dict[str:str]) -> None:
+        if 'password' in update_fields:
+            update_fields['password'] = Sha512Hash(update_fields['password'])
         user = await self.get_by_uuid(user_uuid)
         query = update(models.User).where(models.User.uuid == user_uuid).values(update_fields)
         await self.session.execute(query)
 
+    async def get_by_login_password(self, login: str, password: str) -> entities.User:
+        hashed_password = Sha512Hash(password)
+        user = await self.session.execute(
+            select(models.User).where(
+                models.User.login == login,
+                models.User.password == hashed_password
+            )
+        )
+        user = user.scalar_one_or_none()
+        if user is None:
+            raise exceptions.RecordDontExistsError('User not found')
+        
+        return entities.User(uuid=str(user.uuid), login=user.login, email=user.email, password=user.password)
+    
     async def exists_by(self, column: Column, value: str) -> bool:
         query = select(models.User).where(column == value).exists()
         exists = await self.session.scalar(select(query))
@@ -57,7 +73,7 @@ class UserRepository(interfaces.UserCreater, interfaces.UserUpdater,
 
     async def get(self, user_uuid: str) -> entities.User:
         user = await self.get_by_uuid(user_uuid) 
-        return entities.User(uuid=user.uuid, login=user.login, email=user.email, password=user.password)
+        return entities.User(uuid=str(user.uuid), login=user.login, email=user.email, password=user.password)
 
     async def delete(self, user_uuid: str) -> None:
         user = await self.get_by_uuid(user_uuid) 
@@ -86,9 +102,9 @@ class VideoRepository(interfaces.UserVideoSearcher,
             raise exceptions.RecordDontExistsError('Video not found')
         
         return entities.Video(
-            uuid=video.uuid,
+            uuid=str(video.uuid),
             name=video.name,
-            author_uuid=video.author_uuid,
+            author_uuid=str(video.author_uuid),
             length_seconds=video.length_seconds,
             size=video.size,
             uploaded_at=video.uploaded_at
@@ -147,9 +163,9 @@ class VideoRepository(interfaces.UserVideoSearcher,
         
         videos = [
             entities.Video(
-                uuid=video.uuid, 
+                uuid=str(video.uuid), 
                 name=video.name, 
-                author=video.author_uuid, 
+                author=str(video.author_uuid), 
                 length_seconds=video.length_seconds, 
                 size=video.size,
                 uploaded_at=video.uploaded_at
@@ -183,4 +199,4 @@ class HeatMapRepository(interfaces.HeatMapCreater, interfaces.HeatMapGetter):
         if heat_map is None:
             raise exceptions.RecordDontExistsError('Heat map not found')
         
-        return entities.HeatMap(uuid=heat_map.uuid, video_uuid=video.uuid)
+        return entities.HeatMap(uuid=str(heat_map.uuid), video_uuid=str(video.uuid))

@@ -167,6 +167,20 @@ def test_full_flow(user_data, updated_user_data, video_data, minio_client):
     log_response("Создание видео без авторизации", create_video_unauthorized_response, video_data)
     assert create_video_unauthorized_response.status_code == 401
 
+    # --- Тесты на генерацию токена ---
+    # Успешная генерация токена
+    generate_token_response = client.post("/users/me/token", json={"login": updated_user_data["login"], "password": updated_user_data["password"]})
+    log_response("Генерация токена", generate_token_response, {"login": updated_user_data["login"], "password": updated_user_data["password"]})
+    assert generate_token_response.status_code == 201
+    assert "token" in generate_token_response.json()
+
+    # Генерация токена с некорректными данными
+    invalid_token_data = {"login": updated_user_data["login"], "password": "wrong_password"}
+    generate_token_invalid_response = client.post("/users/me/token", json=invalid_token_data)
+    log_response("Генерация токена с некорректными данными", generate_token_invalid_response, invalid_token_data)
+    assert generate_token_invalid_response.status_code == 404
+    assert generate_token_invalid_response.json()["message"] == "User not found"
+
     # --- Тесты на тепловую карту ---
     # Успешное создание тепловой карты
     heatmap_data = {"video_name": video_data["name"]}
@@ -232,7 +246,7 @@ def test_full_flow(user_data, updated_user_data, video_data, minio_client):
     log_response("Проверка удаления пользователя", get_user_after_delete_response)
     assert get_user_after_delete_response.status_code == 404
 
-    
+
 
 
 

@@ -250,3 +250,17 @@ class GetHeatMapUnloadLinkInteractor:
         
         return dto.GetHeatMapUnloadLinkOutDTO(unload_link=unload_link)
 
+class GenerateUserTokenInteractor:
+    def __init__(self, auth: interfaces.AuthAdder,
+                 repository: interfaces.UserGetterByLoginPassword, 
+                 validator: interfaces.GenerateUserTokenValidator,):
+        self.auth = auth
+        self.repository = repository
+        self.validator = validator
+    async def __call__(self, user_dto: dto.GenerateUserTokenInDTO) -> dto.GenerateUserTokenOutDTO:
+        self.validator.validate(user_dto)
+        user_entity = await self.repository.get_by_login_password(user_dto.login, user_dto.password)
+
+        
+        token = self.auth.add(user_entity.uuid)
+        return dto.GenerateUserTokenOutDTO(token=token)

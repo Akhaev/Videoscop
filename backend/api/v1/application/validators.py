@@ -8,6 +8,7 @@ class CreateUserValidator(interfaces.CreateUserValidator):
     def validate(self, user: dto.CreateUserInDTO) -> None:
         errors = []
 
+        
         if not (3 <= len(user.login) <= 50):
             errors.append(ValidationError.add_error("login", "Login must be between 3 and 50 characters"))
         if not self.is_valid_email(user.email):
@@ -108,6 +109,18 @@ class GetHeatMapUnloadLinkValidator(interfaces.GetHeatMapUnloadLinkValidator):
 
         if not (3 <= len(heatmap_dto.video_name) <= 50):
             errors.append(ValidationError.add_error("video_name", "Name must be between 3 and 50 characters"))
+
+        if errors:
+            raise ValidationError(errors)
+        
+class GenerateUserTokenValidator(interfaces.GenerateUserTokenValidator):
+    def validate(self, user_dto: dto.GenerateUserTokenInDTO) -> None:
+        errors = []
+        
+        if not (3 <= len(user_dto.login) <= 50):
+            errors.append(ValidationError.add_error("login", "Login must be between 3 and 50 characters"))
+        if len(user_dto.password) < 8:
+            errors.append(ValidationError.add_error("password", "Password must be at least 8 characters long"))
 
         if errors:
             raise ValidationError(errors)

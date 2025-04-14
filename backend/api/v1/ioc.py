@@ -8,7 +8,8 @@ from infrastructure.db.repositories import UserRepository, VideoRepository, Heat
 from application.interactors import (CreateUserInteractor, UpdateUserInteractor, GetUserInteractor, 
                                      DeleteUserInteractor, SearchUserVideosInteractor
                                      ,CreateVideoInteractor, CreateHeatMapInteractor, 
-                                     GetHeatMapUnloadLinkInteractor, GetVideoUnloadLinkInteractor
+                                     GetHeatMapUnloadLinkInteractor, GetVideoUnloadLinkInteractor,
+                                     GenerateUserTokenInteractor
                                      )
 from uuid import uuid4
 from application import validators
@@ -51,7 +52,7 @@ class FastApiApp(Provider):
         async with async_sessionmaker() as session:
             yield session
             
-    user_repository = provide(UserRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserCreater, interfaces.UserUpdater, interfaces.UserGetter, interfaces.UserDeletter])
+    user_repository = provide(UserRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserCreater, interfaces.UserUpdater, interfaces.UserGetter, interfaces.UserDeletter, interfaces.UserGetterByLoginPassword])
     video_repository = provide(VideoRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserVideoSearcher, interfaces.VideoCreater, interfaces.VideoGetter])
     heatmap_repository = provide(HeatMapRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.HeatMapCreater, interfaces.HeatMapGetter])
 
@@ -62,7 +63,7 @@ class FastApiApp(Provider):
     create_heat_map_validator = provide(validators.CreateHeatMapValidator, scope=Scope.APP, provides=AnyOf[interfaces.CreateHeatMapValidator])
     get_video_unload_link_validator = provide(validators.GetVideoUnloadLinkValidator, scope=Scope.APP, provides=AnyOf[interfaces.GetVideoUnloadLinkValidator])
     get_heat_map_unload_link_validator = provide(validators.GetHeatMapUnloadLinkValidator, scope=Scope.APP, provides=AnyOf[interfaces.GetHeatMapUnloadLinkValidator])
-
+    generate_user_token_validator = provide(validators.GenerateUserTokenValidator, scope=Scope.APP, provides=AnyOf[interfaces.GenerateUserTokenValidator])
 
     create_user_authAdd = provide(auth.Auth, scope=Scope.REQUEST, provides=AnyOf[interfaces.AuthAdder])
     update_user_authCurrentUserGetter = provide(auth.Auth, scope=Scope.REQUEST, provides=AnyOf[interfaces.AuthCurrentUserGetter])
@@ -78,3 +79,4 @@ class FastApiApp(Provider):
     create_heat_map_interactor = provide(CreateHeatMapInteractor, scope=Scope.REQUEST)
     get_video_unload_link_interactor = provide(GetVideoUnloadLinkInteractor, scope=Scope.REQUEST)
     get_heat_map_unload_link_interactor = provide(GetHeatMapUnloadLinkInteractor, scope=Scope.REQUEST)
+    generate_user_token_interactor = provide(GenerateUserTokenInteractor, scope=Scope.REQUEST)

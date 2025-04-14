@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 from dishka.integrations.fastapi import FromDishka, DishkaRoute
-from application.interactors import CreateUserInteractor, UpdateUserInteractor, GetUserInteractor, DeleteUserInteractor
-from ..schemas import CreateUserIn, CreateUserOut, UpdateUserIn, UpdateUserOut, GetUserOut, DeleteUserOut
+from application.interactors import CreateUserInteractor, UpdateUserInteractor, GetUserInteractor, DeleteUserInteractor, GenerateUserTokenInteractor
+from ..schemas import CreateUserIn, CreateUserOut, UpdateUserIn, UpdateUserOut, GetUserOut, DeleteUserOut, GenerateUserTokenOut, GenerateUserTokenIn
 from ..responses_descriptions import user_responses, common_responses                               
 from application import dto
 
@@ -62,3 +62,14 @@ async def delete_user(interactor: FromDishka[DeleteUserInteractor]) -> DeleteUse
     await interactor()
     return DeleteUserOut(message="User deleted successfully")
 
+@router.post('/me/token', status_code=status.HTTP_201_CREATED, name='Generate user token', 
+             summary='Generates a new authentication token for the user',
+             responses={status.HTTP_422_UNPROCESSABLE_ENTITY: user_responses['generate_token'][422], 
+                        status.HTTP_401_UNAUTHORIZED: common_responses[401],
+                        status.HTTP_404_NOT_FOUND: user_responses['generate_token'][404],
+                        status.HTTP_201_CREATED: user_responses['generate_token'][201]}
+             )
+async def generate_token(user: GenerateUserTokenIn, interactor: FromDishka[GenerateUserTokenInteractor]) -> GenerateUserTokenOut:
+    result = await interactor(dto.GenerateUserTokenInDTO(login=user.login, password=user.password))
+
+    return GenerateUserTokenOut(token=result.token)
