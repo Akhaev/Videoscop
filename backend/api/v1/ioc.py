@@ -52,7 +52,7 @@ class FastApiApp(Provider):
         async with async_sessionmaker() as session:
             yield session
             
-    user_repository = provide(UserRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserCreater, interfaces.UserUpdater, interfaces.UserGetter, interfaces.UserDeletter, interfaces.UserGetterByLoginPassword])
+    user_repository = provide(UserRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserCreater, interfaces.UserUpdater, interfaces.UserGetter, interfaces.UserDeletter, interfaces.UserGetterByLoginPassword | interfaces.UserGetterByEmailPassword])
     video_repository = provide(VideoRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.UserVideoSearcher, interfaces.VideoCreater, interfaces.VideoGetter])
     heatmap_repository = provide(HeatMapRepository, scope=Scope.REQUEST, provides=AnyOf[interfaces.HeatMapCreater, interfaces.HeatMapGetter])
 

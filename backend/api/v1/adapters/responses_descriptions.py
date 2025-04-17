@@ -253,11 +253,11 @@ user_responses = {
             }
         },
         404: {
-            "description": "Not found: password or login dont exists.",
+            "description": "Not found: password or login\email dont exists.",
             "content": {
                 "application/json": {
                     "examples": {
-                        "Password or login dont exists": {
+                        "Password or login\email dont exists": {
                             "value": {
                                 "message": "User not found",
                             }

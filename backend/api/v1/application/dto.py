@@ -79,9 +79,9 @@ class GetHeatMapUnloadLinkOutDTO:
 
 @dataclass(slots=True)
 class GenerateUserTokenInDTO:
-    login: str
     password: str
-
+    login: str | None = None
+    email: str | None = None
 @dataclass(slots=True)
 class GenerateUserTokenOutDTO:
     token: str

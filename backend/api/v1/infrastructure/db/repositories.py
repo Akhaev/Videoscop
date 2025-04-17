@@ -15,7 +15,7 @@ def Sha512Hash(text: str) -> str:
     return hashed_password
 
 class UserRepository(interfaces.UserCreater, interfaces.UserUpdater, 
-                     interfaces.UserDeletter, interfaces.UserGetter):
+                     interfaces.UserDeletter, interfaces.UserGetter, interfaces.UserGetterByEmailPassword, interfaces.UserGetterByLoginPassword):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
@@ -35,6 +35,20 @@ class UserRepository(interfaces.UserCreater, interfaces.UserUpdater,
         user = await self.session.execute(
             select(models.User).where(
                 models.User.login == login,
+                models.User.password == hashed_password
+            )
+        )
+        user = user.scalar_one_or_none()
+        if user is None:
+            raise exceptions.RecordDontExistsError('User not found')
+        
+        return entities.User(uuid=str(user.uuid), login=user.login, email=user.email, password=user.password)
+    
+    async def get_by_email_password(self, email: str, password: str) -> entities.User:
+        hashed_password = Sha512Hash(password)
+        user = await self.session.execute(
+            select(models.User).where(
+                models.User.email == email,
                 models.User.password == hashed_password
             )
         )

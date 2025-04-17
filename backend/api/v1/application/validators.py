@@ -4,50 +4,50 @@ from .exceptions import ValidationError
 from . import interfaces
 from . import dto
 
+def is_valid_email(email: str) -> bool:
+    return bool(re.match(r"^[\w.-]+@[\w.-]+\.\w+$", email))
+    
+def is_valid_login(login: str) -> bool:
+    return 3 <= len(login) <= 50
+
+def is_valid_password(password: str) -> bool:
+    return len(password) >= 8
+
+def is_valid_video_name(name: str) -> bool:
+    return 3 <= len(name) <= 50
+
 class CreateUserValidator(interfaces.CreateUserValidator):
     def validate(self, user: dto.CreateUserInDTO) -> None:
         errors = []
 
-        
-        if not (3 <= len(user.login) <= 50):
+        if not is_valid_login(user.login):
             errors.append(ValidationError.add_error("login", "Login must be between 3 and 50 characters"))
-        if not self.is_valid_email(user.email):
+        if not is_valid_email(user.email):
             errors.append(ValidationError.add_error("email", "Invalid email format"))
-        if len(user.password) < 8:
+        if not is_valid_password(user.password):
             errors.append(ValidationError.add_error("password", "Password must be at least 8 characters long"))
 
         if errors:
             raise ValidationError(errors)
 
-    @staticmethod
-    def is_valid_email(email: str) -> bool:
-        return bool(re.match(r"^[\w.-]+@[\w.-]+\.\w+$", email))
-
 class UpdateUserValidator(interfaces.UpdateUserValidator):
     def validate(self, user: dto.UpdateUserInDTO) -> None:
         errors = []
 
-        if user.login is not None:
-            if not (3 <= len(user.login) <= 50):
-                errors.append(ValidationError.add_error("login", "Login must be between 3 and 50 characters"))
+        if user.login is not None and not is_valid_login(user.login):
+            errors.append(ValidationError.add_error("login", "Login must be between 3 and 50 characters"))
 
-        if user.email is not None:
-            if not self.is_valid_email(user.email):
-                errors.append(ValidationError.add_error("email", "Invalid email format"))
+        if user.email is not None and not is_valid_email(user.email):
+            errors.append(ValidationError.add_error("email", "Invalid email format"))
 
-        if user.password is not None:
-            if len(user.password) < 8:
-                errors.append(ValidationError.add_error("password", "Password must be at least 8 characters long"))
+        if user.password is not None and not is_valid_password(user.password):
+            errors.append(ValidationError.add_error("password", "Password must be at least 8 characters long"))
 
         if not any(field is not None for field in [user.login, user.email, user.password]):
             errors.append(ValidationError.add_error("general", "At least one field must be provided"))
 
         if errors:
             raise ValidationError(errors)
-
-    @staticmethod
-    def is_valid_email(email: str) -> bool:
-        return bool(re.match(r"^[\w.-]+@[\w.-]+\.\w+$", email))
 
 class SearchUserVideosValidator(interfaces.SearchUserVideosValidator):
     def validate(self, count: int, date: datetime.date | None) -> None:
@@ -73,12 +73,8 @@ class CreateVideoValidator(interfaces.CreateVideoValidator):
     def validate(self, video: dto.CreateVideoInDTO) -> None:
         errors = []
 
-        if not (3 <= len(video.name) <= 50):
+        if not is_valid_video_name(video.name):
             errors.append(ValidationError.add_error("name", "Name must be between 3 and 50 characters"))
-        if not (1 <= video.length_seconds <= 3600):
-            errors.append(ValidationError.add_error("length_seconds", "Length must be between 1 and 3600 seconds"))
-        if not isinstance(video.size, int) or not (1 <= video.size <= 1000):
-            errors.append(ValidationError.add_error("size", "Size must be an integer between 1 and 1000 MB"))
 
         if errors:
             raise ValidationError(errors)
@@ -87,7 +83,7 @@ class CreateHeatMapValidator(interfaces.CreateHeatMapValidator):
     def validate(self, video_name: str) -> None:
         errors = []
 
-        if not (3 <= len(video_name) <= 50):
+        if not is_valid_video_name(video_name):
             errors.append(ValidationError.add_error("video_name", "Name must be between 3 and 50 characters"))
 
         if errors:
@@ -97,7 +93,7 @@ class GetVideoUnloadLinkValidator(interfaces.GetVideoUnloadLinkValidator):
     def validate(self, video_dto: dto.GetVideoUnloadLinkInDto) -> None:
         errors = []
 
-        if not (3 <= len(video_dto.video_name) <= 50):
+        if not is_valid_video_name(video_dto.video_name):
             errors.append(ValidationError.add_error("video_name", "Name must be between 3 and 50 characters"))
 
         if errors:
@@ -107,19 +103,23 @@ class GetHeatMapUnloadLinkValidator(interfaces.GetHeatMapUnloadLinkValidator):
     def validate(self, heatmap_dto: dto.GetHeatMapUnloadLinkInDto) -> None:
         errors = []
 
-        if not (3 <= len(heatmap_dto.video_name) <= 50):
+        if not is_valid_video_name(heatmap_dto.video_name):
             errors.append(ValidationError.add_error("video_name", "Name must be between 3 and 50 characters"))
 
         if errors:
             raise ValidationError(errors)
-        
+
 class GenerateUserTokenValidator(interfaces.GenerateUserTokenValidator):
     def validate(self, user_dto: dto.GenerateUserTokenInDTO) -> None:
         errors = []
-        
-        if not (3 <= len(user_dto.login) <= 50):
+
+        if user_dto.login is None and user_dto.email is None:
+            errors.append(ValidationError.add_error("general", "Either login or email must be provided"))
+        if user_dto.login is not None and not is_valid_login(user_dto.login):
             errors.append(ValidationError.add_error("login", "Login must be between 3 and 50 characters"))
-        if len(user_dto.password) < 8:
+        elif user_dto.email is not None and not is_valid_email(user_dto.email):
+            errors.append(ValidationError.add_error("email", "Invalid email format"))
+        if not is_valid_password(user_dto.password):
             errors.append(ValidationError.add_error("password", "Password must be at least 8 characters long"))
 
         if errors:

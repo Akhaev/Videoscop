@@ -30,17 +30,20 @@ class CreateUserOut(BaseModel):
 
 class UpdateUserIn(BaseModel):
     login: str | None = Field(
+        default=None,
         title="Login of the user",
         description="The login must be a string between 3 and 50 characters. Optional.",
         min_length=3,
         max_length=50
     )
     email: str | None = Field(
+        default=None,
         title="Email of the user",
         description="The email must be a valid email format. Optional.",
         pattern=r"^[\w.-]+@[\w.-]+\.\w+$"
     )
     password: str | None = Field(
+        default=None,
         title="Password of the user",
         description="The password must be at least 8 characters long. Optional.",
         min_length=8
@@ -199,11 +202,18 @@ class GetVideoUnloadLinkOut(BaseModel):
     )
     
 class GenerateUserTokenIn(BaseModel):
-    login: str = Field(
+    login: str | None = Field(
         title="Login of the user",
         description="The login must be a string between 3 and 50 characters.",
         min_length=3,
-        max_length=50
+        max_length=50,
+        default=None
+    )
+    email: str | None = Field(
+        title="Email of the user",
+        description="The email must be a valid email format.",
+        pattern=r"^[\w.-]+@[\w.-]+\.\w+$",
+        default=None
     )
     password: str = Field(
         title="Password of the user",

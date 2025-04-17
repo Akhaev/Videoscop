@@ -126,6 +126,11 @@ class UserGetterByLoginPassword(Protocol):
     def get_by_login_password(self, login: str, password: str) -> entities.User:
         pass
     
+class UserGetterByEmailPassword(Protocol):
+    @abstractmethod
+    def get_by_login_password(self, email: str, password: str) -> entities.User:
+        pass
+    
 class GenerateUserTokenValidator(Protocol):
     @abstractmethod
     def validate(self, user: dto.GenerateUserTokenInDTO) -> None:
