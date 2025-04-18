@@ -168,6 +168,7 @@ def test_full_flow(user_data, updated_user_data, video_data, minio_client):
     assert create_video_unauthorized_response.status_code == 401
 
     # --- Тесты на генерацию токена ---
+    # --- Тесты на генерацию токена ---
     # Успешная генерация токена
     generate_token_response = client.post("/users/me/token", json={"login": updated_user_data["login"], "password": updated_user_data["password"]})
     log_response("Генерация токена", generate_token_response, {"login": updated_user_data["login"], "password": updated_user_data["password"]})
@@ -180,6 +181,23 @@ def test_full_flow(user_data, updated_user_data, video_data, minio_client):
     log_response("Генерация токена с некорректными данными", generate_token_invalid_response, invalid_token_data)
     assert generate_token_invalid_response.status_code == 404
     assert generate_token_invalid_response.json()["message"] == "User not found"
+
+    # Успешная генерация токена с использованием email
+    generate_token_email_response = client.post("/users/me/token", json={"email": updated_user_data["email"], "password": updated_user_data["password"]})
+    log_response("Генерация токена с email", generate_token_email_response, {"email": updated_user_data["email"], "password": updated_user_data["password"]})
+    assert generate_token_email_response.status_code == 201
+    assert "token" in generate_token_email_response.json()
+
+    # Генерация токена с пропущенными входными данными
+    missing_login_data = {"password": updated_user_data["password"]}
+    generate_token_missing_login_response = client.post("/users/me/token", json=missing_login_data)
+    log_response("Генерация токена с пропущенным логином", generate_token_missing_login_response, missing_login_data)
+    assert generate_token_missing_login_response.status_code == 422
+
+    missing_password_data = {"login": updated_user_data["login"]}
+    generate_token_missing_password_response = client.post("/users/me/token", json=missing_password_data)
+    log_response("Генерация токена с пропущенным паролем", generate_token_missing_password_response, missing_password_data)
+    assert generate_token_missing_password_response.status_code == 422
 
     # --- Тесты на тепловую карту ---
     # Успешное создание тепловой карты

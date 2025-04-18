@@ -69,6 +69,6 @@ async def delete_user(interactor: FromDishka[DeleteUserInteractor]) -> DeleteUse
                         status.HTTP_201_CREATED: user_responses['generate_token'][201]}
              )
 async def generate_token(user: GenerateUserTokenIn, interactor: FromDishka[GenerateUserTokenInteractor]) -> GenerateUserTokenOut:
-    result = await interactor(dto.GenerateUserTokenInDTO(login=user.login, password=user.password))
+    result = await interactor(dto.GenerateUserTokenInDTO(login=user.login, email=user.email, password=user.password))
 
     return GenerateUserTokenOut(token=result.token)
