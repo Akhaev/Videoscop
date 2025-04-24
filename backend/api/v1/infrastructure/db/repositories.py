@@ -186,7 +186,7 @@ class VideoRepository(interfaces.UserVideoSearcher,
             entities.Video(
                 uuid=str(video.uuid), 
                 name=video.name, 
-                author=str(video.author_uuid), 
+                author_uuid=str(video.author_uuid), 
                 length_seconds=video.length_seconds, 
                 size=video.size,
                 uploaded_at=video.uploaded_at
