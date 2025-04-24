@@ -35,7 +35,7 @@ class Video(Base):
     heat_map: Mapped["HeatMap"] = relationship(back_populates="video", passive_deletes='all')
     
     __table_args__ = (
-        sa.UniqueConstraint('name', 'author_uuid', name='uq_video_name_author'),
+        sa.UniqueConstraint('author_uuid', 'name', name='uq_video_name_author'),
         sa.Index('ix_video_author_uuid', 'author_uuid'), 
     )
 

@@ -153,14 +153,21 @@ class VideoRepository(interfaces.UserVideoSearcher,
         if cursor is None:
             current_time = int(time.time() * 1000)
             cursor = hashlib.sha512(f'user_id_{user_uuid}_{current_time}'.encode('utf-8')).hexdigest()
-
-            declare_query = text(f"""
-                DECLARE "{cursor}" CURSOR WITH HOLD FOR 
-                SELECT * FROM videos 
-                WHERE author_uuid = :user_uuid AND uploaded_at = :date
-                ORDER BY name
-            """)
-
+            if date is not None:
+                declare_query = text(f"""
+                    DECLARE "{cursor}" CURSOR WITH HOLD FOR 
+                    SELECT * FROM videos 
+                    WHERE author_uuid = :user_uuid AND uploaded_at = :date
+                    ORDER BY name
+                """)
+            else:
+                declare_query = text(f"""
+                    DECLARE "{cursor}" CURSOR WITH HOLD FOR 
+                    SELECT * FROM videos 
+                    WHERE author_uuid = :user_uuid
+                    ORDER BY name
+                """)
+                                
             await self.session.execute(declare_query, {"user_uuid": user_uuid, "date": date})
 
         fetch_query = text(f"""
