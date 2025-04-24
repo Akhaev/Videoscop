@@ -18,11 +18,11 @@ router = APIRouter(prefix='/users/me/videos/heatmap', tags=['HeatMap'], route_cl
                  status.HTTP_404_NOT_FOUND: heat_map_responses['create'][404],
                  status.HTTP_409_CONFLICT: heat_map_responses['create'][409],
              })
-async def create_heatmap(data: CreateHeatMapIn, interactor: FromDishka[CreateHeatMapInteractor]) -> CreateHeatMapOut:
+async def create_heatmap(data: CreateHeatMapIn, interactor: FromDishka[CreateHeatMapInteractor]) -> dict:
     result = await interactor(dto.CreateHeatMapInDTO(
         video_name=data.video_name
     ))
-    return CreateHeatMapOut(upload_link=result.upload_link)
+    return {"upload_link": result.upload_link}
 
 @router.get('/unload_link',
              status_code=status.HTTP_200_OK,
@@ -33,8 +33,8 @@ async def create_heatmap(data: CreateHeatMapIn, interactor: FromDishka[CreateHea
                  status.HTTP_404_NOT_FOUND: heat_map_responses['get_unload_link'][404],
                  status.HTTP_422_UNPROCESSABLE_ENTITY: heat_map_responses['get_unload_link'][422],
              })
-async def get_heatmap_unload_link(data: Annotated[GetHeatMapUnloadLinkIn, Query()], interactor: FromDishka[GetHeatMapUnloadLinkInteractor]) -> GetHeatMapUnloadLinkOut:
+async def get_heatmap_unload_link(data: Annotated[GetHeatMapUnloadLinkIn, Query()], interactor: FromDishka[GetHeatMapUnloadLinkInteractor]) -> dict:
     result = await interactor(dto.GetHeatMapUnloadLinkInDto(
         video_name=data.video_name
     ))
-    return GetHeatMapUnloadLinkOut(unload_link=result.unload_link)
+    return {"unload_link": result.unload_link}

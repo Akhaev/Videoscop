@@ -17,13 +17,13 @@ router = APIRouter(prefix='/users/me/videos', tags=['Video'], route_class=Dishka
                 status.HTTP_422_UNPROCESSABLE_ENTITY: video_responses['search'][422],
                 status.HTTP_404_NOT_FOUND: video_responses['search'][404]
             })
-async def search_user_video(data: Annotated[SearchVideoIn, Query()], interactor: FromDishka[SearchUserVideosInteractor]) -> SearchVideoOut:
+async def search_user_video(data: Annotated[SearchVideoIn, Query()], interactor: FromDishka[SearchUserVideosInteractor]) -> dict:
     result = await interactor(dto.SearchUserVideosInDTO(
         date=data.date,
         count=data.count,
         cursor=data.cursor
     ))
-    return SearchVideoOut(videos=result.videos, cursor=result.cursor)
+    return {"videos": result.videos, "cursor": result.cursor}
 
 
 @router.post('',
@@ -36,13 +36,14 @@ async def search_user_video(data: Annotated[SearchVideoIn, Query()], interactor:
                  status.HTTP_404_NOT_FOUND: video_responses['create'][404],
                  status.HTTP_409_CONFLICT: video_responses['create'][409]
              })
-async def create_video(video: CreateVideoIn, interactor: FromDishka[CreateVideoInteractor]) -> CreateVideoOut:
+async def create_video(video: CreateVideoIn, interactor: FromDishka[CreateVideoInteractor]) -> dict:
     result = await interactor(dto.CreateVideoInDTO(
         name=video.name,
         length_seconds=video.length_seconds,
         size=video.size
     ))
-    return CreateVideoOut(upload_link=result.upload_link)
+    return {"upload_link": result.upload_link}
+
 
 @router.get('/unload_link',
             status_code=status.HTTP_200_OK,
@@ -53,8 +54,8 @@ async def create_video(video: CreateVideoIn, interactor: FromDishka[CreateVideoI
                 status.HTTP_404_NOT_FOUND: video_responses['get_unload_link'][404],
                 status.HTTP_422_UNPROCESSABLE_ENTITY: video_responses['get_unload_link'][422]
             })
-async def get_video_unload_link(data: Annotated[GetVideoUnloadLinkIn, Query()], interactor: FromDishka[GetVideoUnloadLinkInteractor]) -> GetVideoUnloadLinkOut:
+async def get_video_unload_link(data: Annotated[GetVideoUnloadLinkIn, Query()], interactor: FromDishka[GetVideoUnloadLinkInteractor]) -> dict:
     result = await interactor(dto.GetVideoUnloadLinkInDto(
         video_name=data.name
     ))
-    return GetVideoUnloadLinkOut(unload_link=result.unload_link)
+    return {"unload_link": result.unload_link}
