@@ -7,9 +7,20 @@ from datetime import datetime, timedelta, timezone
 from minio import Minio
 from config import MinioConfig
 import io
+import time
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 
 client = TestClient(app)
 faker = Faker()
+
+# Логирование SQL-запросов
+executed_queries = []
+
+def log_sql_queries(conn, cursor, statement, parameters, context, executemany):
+    executed_queries.append(statement)
+
+event.listen(Engine, "before_cursor_execute", log_sql_queries)
 
 @pytest.fixture
 def user_data():
@@ -60,6 +71,10 @@ def log_response(action: str, response, data=None):
     print(f"{'='*60}\n")
 
 def test_full_flow(user_data, updated_user_data, video_data, minio_client):
+    start_time = time.time()  # Начало замера времени
+    global executed_queries
+    executed_queries = []  # Сброс списка запросов
+
     # 1. Создание пользователя
     create_user_response = client.post("/users", json=user_data)
     log_response("Создание пользователя", create_user_response, user_data)
@@ -168,7 +183,6 @@ def test_full_flow(user_data, updated_user_data, video_data, minio_client):
     assert create_video_unauthorized_response.status_code == 401
 
     # --- Тесты на генерацию токена ---
-    # --- Тесты на генерацию токена ---
     # Успешная генерация токена
     generate_token_response = client.post("/users/me/token", json={"login": updated_user_data["login"], "password": updated_user_data["password"]})
     log_response("Генерация токена", generate_token_response, {"login": updated_user_data["login"], "password": updated_user_data["password"]})
@@ -263,6 +277,18 @@ def test_full_flow(user_data, updated_user_data, video_data, minio_client):
     get_user_after_delete_response = client.get("/users/me", headers=headers)
     log_response("Проверка удаления пользователя", get_user_after_delete_response)
     assert get_user_after_delete_response.status_code == 404
+
+    # Вывод времени выполнения теста
+    elapsed_time = time.time() - start_time
+    print(f"\n{'='*20} Test Execution Time {'='*20}")
+    print(f"Elapsed Time: {elapsed_time:.2f} seconds")
+    print(f"{'='*60}\n")
+
+    # Вывод всех SQL-запросов
+    print(f"\n{'='*20} Executed SQL Queries {'='*20}")
+    for query in executed_queries:
+        print(query)
+    print(f"{'='*60}\n")
 
 
 

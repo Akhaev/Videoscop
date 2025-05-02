@@ -12,10 +12,10 @@ class FastApiConfig(BaseModel):
     title: str = Field(default='Videoscop')
     version: str = Field(default='1.0')
     description: str = Field(default='Videoscop API')
-    allow_origins: str = Field(default=['*'])
+    allow_origins: list[str] = Field(default=['*'])
     allow_credentials: str = Field(default=True)
-    allow_methods: str = Field(default=['*'])
-    allow_headers: str = Field(default=['*'])
+    allow_methods: list[str] = Field(default=['*'])
+    allow_headers: list[str] = Field(default=['*'])
 
 class JWTConfig(BaseModel):
     secret_key: str = Field(default='default')
