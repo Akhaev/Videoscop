@@ -10,10 +10,10 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Копирование файлов проекта
-COPY . /app
+COPY ../../backend /app/backend
 
 # Установка зависимостей Python
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r /app/backend/requirements.txt
 
 # Установка переменных окружения
 ENV POSTGRES_HOST=127.0.0.1

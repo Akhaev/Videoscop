@@ -2,7 +2,8 @@ from os import environ as env
 from pydantic import Field, BaseModel
 
 class PostgresConfig(BaseModel):
-    driver: str = Field(alias='Driver name', default='postgresql+asyncpg')
+    sync_driver: str = Field(alias='Driver name', default='postgresql')
+    async_driver: str = Field(alias='Driver name', default='postgresql+asyncpg')
     host: str = Field(alias='POSTGRES_HOST', default='127.0.0.1')
     port: int = Field(alias='POSTGRES_PORT', default='5432')
     login: str = Field(alias='POSTGRES_USER', default='postgres')

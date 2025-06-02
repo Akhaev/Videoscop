@@ -3,8 +3,8 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from sqlalchemy import URL
-from ..config import PostgresConfig
-from ..infrastructure.db.models import DeclarativeBase
+from config import PostgresConfig
+from infrastructure.db.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -19,12 +19,12 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = DeclarativeBase.metadata
+target_metadata = Base.metadata
 
 psql_config = PostgresConfig()
 
-database_uri = URL.create(drivername=psql_config.driver,
-            login=psql_config.login,
+database_uri = URL.create(drivername=psql_config.sync_driver,
+            username=psql_config.login,
             password=psql_config.password,
             host=psql_config.host,
             port=psql_config.port,
