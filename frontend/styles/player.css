@@ -1,0 +1,485 @@
+body,
+html {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Wix Madefor Display', sans-serif;
+  color: rgba(0, 0, 0, 0.8);
+  background-color: var(--main-backgroundColor);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+:root {
+  --main-backgroundColor: #1d1e27;
+  --main-color: #fafafa;
+  --active: #e8162e;
+}
+
+.progress-player {
+  display: flex;
+  position: fixed;
+  top: 20px;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #fff 70%, red);
+}
+
+.heatmap-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 999;
+  mix-blend-mode: multiply;
+  width: 100%;
+  height: 100%;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 3rem;
+  margin-top: 2.2rem;
+  padding: 0 2rem;
+  position: fixed !important;
+  top: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+h1 {
+  cursor: pointer;
+  text-shadow: 5px 2px rgba(0, 0, 0, 0.1);
+  transform: scale(1.1) !important;
+  font-size: 2.2rem !important;
+}
+
+#player {
+  cursor: pointer;
+  font-family: 'Wix Madefor Display', sans-serif !important;
+  font-weight: 500;
+  font-size: 2.35rem !important;
+  text-shadow: 5px 3px rgba(0, 0, 0, 0.2) !important;
+  transform: scale(1.11) !important;
+  margin-left: 4rem !important;
+}
+
+.left,
+.center,
+.right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+header,
+.left,
+.center,
+.right,
+.loupe {
+  position: relative;
+  z-index: 100;
+}
+
+.search {
+  position: relative;
+  padding: 15px;
+  margin: -15px;
+  cursor: pointer;
+  margin-bottom: -4.2rem;
+  z-index: 999;
+}
+
+.search input {
+  position: relative;
+  color: #fff;
+  background-color: #262934 !important;
+  font-size: 1.1rem;
+  margin: 6rem auto 0rem auto;
+  padding: 1.2rem 4rem 1.2rem 1.5rem;
+  width: 65vw;
+  border: none;
+  border-bottom: 0.1px solid rgba(241, 239, 239, 0.4);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transform-origin: right;
+  z-index: 1000;
+  transition: 0.5s all ease-in-out;
+}
+
+.latest-sessions {
+  position: absolute;
+  display: none;
+  justify-content: space-between;
+  color: #fff;
+  background-color: #262934 !important;
+  font-size: 1.1rem;
+  padding: 1.5rem 4rem 2.5rem 1.5rem;
+  cursor: pointer;
+  height: 70px;
+  width: 58.5vw;
+  border: none;
+  border-radius: 0.5rem;
+  z-index: 2000;
+  transition: 0.3s all ease-in-out;
+}
+
+.latest-sessions p {
+  display: flex;
+  align-items: flex-start;
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.more-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.custom-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.rotated-150 {
+  transform: rotate(-90deg) scale(2.5);
+}
+
+.rotated-90 {
+  transform: rotate(90deg) scale(2.5);
+}
+
+.more-btn svg {
+  flex-shrink: 0.3;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+#show-more-btn {
+  font-size: 1rem;
+  padding: 0.5rem !important;
+}
+
+.search input:focus {
+  outline: none;
+  border: 1px solid #fff;
+  box-shadow: 0 0 0 2px rgba(240, 240, 240, 0.3);
+  transition: all 0.2s ease;
+}
+
+.search input:focus ~ .latest-sessions {
+  display: flex;
+}
+
+.loupe {
+  transform: translate(-4.2rem, 0.8rem);
+  cursor: pointer;
+  fill: #f0f0f0;
+  width: 38px;
+  height: 38px;
+  z-index: 20000;
+  pointer-events: none;
+}
+
+.latest-sessions {
+  display: none;
+}
+
+.latest-sessions.visible {
+  display: flex;
+}
+
+.search::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  bottom: -15px;
+  left: -15px;
+  right: -15px;
+  z-index: -1;
+}
+
+.search input::placeholder {
+  color: #fff;
+  opacity: 0.5;
+  font-family: 'Wix Madefor Display', sans-serif !important;
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+#settings-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.settings {
+  position: relative;
+  z-index: 1000;
+}
+
+#settings-btn {
+  display: flex;
+  transform: translateX(20px);
+  background-color: transparent !important;
+  z-index: 0.9;
+}
+
+.settings button img:hover {
+  transition: 0.9s all ease-in-out;
+  transform: rotate(360deg);
+  background-color: transparent;
+}
+
+video {
+  max-width: 50%;
+  height: auto;
+  margin-bottom: 20px;
+  border: 0.7rem solid #262934;
+  box-shadow: 0 2px 8px rgb(45, 48, 62);
+}
+
+.player-container {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  margin: -2rem auto !important;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.remove-sidebar {
+  all: unset;
+  width: 35px;
+  height: 36px;
+  cursor: pointer;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  z-index: 11;
+  cursor: pointer;
+  border-radius: 1.2rem;
+  border: none;
+  font-size: 10pt;
+  font-weight: bold;
+  padding: 0.7em;
+  margin: 0.3em;
+  font-family: 'Wix Madefor Display', sans-serif;
+  transition: 0.4s all ease-in-out;
+  border-radius: 5px;
+}
+
+.home {
+  position: fixed;
+  left: 5px;
+  top: 5px;
+}
+
+.player-container {
+  background-color: var(--main-backgroundColor);
+  position: relative;
+  display: inline-block;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center !important;
+  width: 100vw;
+  max-width: 1200px;
+  padding: 0 1rem;
+  transform: scale(1.2);
+  margin: 2rem auto !important;
+}
+
+#video-player {
+  width: 100% !important;
+  height: auto;
+  margin-top: 5rem;
+  background-color: var(--main-backgroundColor);
+}
+
+#heatmap-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: none;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 0.2rem;
+  width: 55%;
+}
+
+.controls-button {
+  display: flex;
+  align-items: center;
+  gap: -1rem !important;
+  background-color: #fff;
+  border-radius: 2rem;
+  margin: 0 2px;
+  padding: 6px 1px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.controls-button button {
+  font-size: 0.8rem;
+  padding: 1px 18px;
+  border-radius: 2rem !important;
+  color: #1d1e27;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#toggle-heatmap {
+  color: var(--main-backgroundColor);
+  padding: 11px 15px;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  width: max-content;
+  transition: all 0.2s ease;
+}
+
+.controls-button img {
+  height: 22px;
+  width: 22px;
+  margin: 0;
+  transition: transform 0.3s ease;
+}
+
+.controls-button img:first-child {
+  transform: translateX(-2px) rotate(180deg);
+}
+
+.error-message {
+  position: absolute;
+  bottom: 0.3rem;
+  color: var(--active);
+  background-color: #262934;
+  display: none;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 4rem;
+  padding: 1.4rem 2rem;
+  border-radius: 0.4rem;
+  transition: 0.3s all ease-in-out;
+}
+
+#heatmap-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#heatmap-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#target {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  border-radius: 50%;
+  pointer-events: auto;
+  cursor: move;
+  z-index: 20;
+}
+
+@media (max-width: 925px) {
+  .left h1 {
+    display: none;
+  }
+
+  #player {
+    font-size: 2rem !important;
+  }
+
+  #settings-btn img {
+    transform: scale(0.88);
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .center {
+    order: 3;
+    width: 100%;
+    justify-content: left;
+    margin: -0.5rem 5rem 1rem 0 !important;
+    transform: translate(-3.3rem, -1rem);
+  }
+
+  .player-container {
+    transform: scale(1) translateX(-2rem);
+  }
+
+  .controls {
+    flex-direction: column;
+  }
+
+  .controls-button,
+  #toggle-heatmap {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* .search input {
+        pointer-events: none;
+    } */
+}
+
+@media (max-width: 460px) {
+  header {
+    flex-wrap: nowrap;
+    transform: translateX(-2rem);
+  }
+
+  #settings-btn img {
+    transform: scale(0.76);
+  }
+}
+
+@media (max-width: 275px) {
+  header {
+    transform: translateX(-4.5rem);
+  }
+
+  .loupe {
+    transform: scale(0.8) translate(-4.1rem, 1.5rem);
+  }
+}

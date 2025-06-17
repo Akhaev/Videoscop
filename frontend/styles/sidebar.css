@@ -1,0 +1,72 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  position: fixed;
+  right: -500px;
+  height: 100vh;
+  width: 330px;
+  top: 0;
+  border: 2px inset var(--main-color);
+  border-right: none;
+  border-radius: 2rem 0.3rem;
+  padding: 2rem;
+  margin: 0;
+  padding-top: 1rem;
+  z-index: 1000;
+  background: #e8162e;
+  font-size: 1.1rem;
+  box-shadow: inset 50px 50px 100px #000;
+  transition: right 0.8s ease-in-out;
+}
+.sidebar .sidebar.open {
+  right: 0;
+}
+.sidebar .sidebar ul {
+  color: var(--main-color);
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 1.3rem;
+  width: 100%;
+  padding: 0;
+}
+.sidebar .sidebar ul li {
+  font-size: 1.3rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.4s all ease-in-out;
+}
+.sidebar .remove-sidebar {
+  all: unset;
+  width: 35px;
+  height: 36px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+.sidebar .sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.2rem;
+  width: 100%;
+  margin-top: auto;
+  margin-bottom: 2rem;
+  justify-content: flex-end;
+  padding: 1rem auto;
+  list-style: none;
+}
+.sidebar .sidebar-footer li {
+  color: var(--main-color);
+  font-size: 1.3rem;
+  font-weight: 500;
+  transition: 0.4s all ease-in-out;
+}
+.sidebar .sidebar ul li:hover,
+.sidebar .sidebar-footer li:hover {
+  text-decoration: underline;
+}
+
+/*# sourceMappingURL=sidebar.css.map */
