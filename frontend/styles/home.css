@@ -7,6 +7,7 @@ html {
   color: rgba(0, 0, 0, 0.8);
   background-color: var(--main-backgroundColor);
   margin: 0;
+  padding-top: 80px;
 }
 
 :root {
@@ -24,12 +25,19 @@ html {
   background: linear-gradient(to right, white 10%, #e8162e 110%);
 }
 
-header {
+.header-flex {
   display: flex;
-  align-items: center !important;
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
-  gap: 3rem;
-  margin-top: 2.2rem;
+  width: 100%;
+  padding: 0 20px;
+  margin: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  background: transparent;
 }
 
 h1 {
@@ -48,9 +56,10 @@ h1 {
 
 .header-text-content {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 5rem;
+  gap: 2rem;
+  margin-top: 3rem;
 }
 
 .header-text-content button {
@@ -88,9 +97,13 @@ h1 {
 
 #settings-btn {
   display: flex;
-  transform: translateX(20px);
+  transform: translateX(20px) translateY(20px);
   background-color: transparent !important;
-  z-index: 0.9;
+  z-index: 0.9 !important;
+}
+
+.sidebar.open #settings-btn {
+  display: none !important;
 }
 
 .settings button img:hover {
@@ -112,12 +125,12 @@ h1 {
   border: 2px inset var(--main-color);
   border-right: none;
   border-radius: 2rem 0.3rem;
-  padding: 2rem;
+  padding: 1rem;
   margin: 0;
   padding-top: 1rem;
-  z-index: 1000;
+  z-index: 2000 !important;
   background: #e8162e;
-  font-size: 1.1rem;
+  font-size: .5rem !important;
   box-shadow: inset 25px 25px 40px rgba(0, 0, 0, 0.25);
   transition: right 0.8s ease-in-out;
 }
@@ -135,20 +148,33 @@ h1 {
   gap: 1.3rem;
   width: 100%;
   padding: 0;
+  padding-right: 3rem;
 }
-.sidebar ul li {
-  font-size: 1.3rem;
+
+.sidebar ul li,
+.sidebar ul button {
+  font-size: 1.2rem;
   font-weight: 500;
   cursor: pointer;
   transition: 0.4s all ease-in-out;
 }
+
+.sidebar ul button {
+  background: inherit;
+  color: inherit;
+  font-weight: lighter;
+  font-size: 1.3rem;
+}
+
 .sidebar .remove-sidebar {
   all: unset;
-  width: 35px;
-  height: 36px;
+  width: 65px;
+  height: 60px;
+  transform: scale(1.2) translateX(15px);
   cursor: pointer;
   margin-bottom: 1rem;
 }
+
 .sidebar .sidebar-footer {
   display: flex;
   flex-direction: column;
@@ -161,15 +187,24 @@ h1 {
   padding: 1rem auto;
   list-style: none;
 }
+
 .sidebar .sidebar-footer li {
   color: var(--main-color);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 500;
   transition: 0.4s all ease-in-out;
 }
+
 .sidebar ul li:hover,
 .sidebar .sidebar-footer li:hover {
   text-decoration: underline;
+}
+
+.settings.disabled {
+  pointer-events: none;
+  opacity: 0;
+  transition: ease-in all .4s;
+  top: auto !important;
 }
 
 .hide-eye {
@@ -292,8 +327,19 @@ button {
   transition: 0.4s all ease-in-out;
 }
 
+#camera-status {
+  font-size: 2.2rem;
+}
+
 .webcam-container {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-57%, -60%);
   width: 100%;
   max-width: 750px;
   height: 480px;
@@ -321,6 +367,15 @@ button {
   transition: opacity 0.3s ease;
 }
 
+.video-upload button {
+  padding: 1.3rem !important;
+  font-size: 1.5rem !important;
+  font-weight: 500 !important;
+  border-radius: 2.4rem !important;
+  width: 120%;
+  margin-bottom: 1rem !important;
+}
+
 #overlay {
   position: absolute;
   top: 0;
@@ -338,12 +393,14 @@ button {
 }
 
 .video-upload {
-  position: absolute;
-  bottom: 138px;
-  left: 39.8%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  display: inline-block;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem !important;
+  max-width: 320px;
+  width: 100%;
+  margin: 0 auto;
   border-radius: 8px;
   font-size: 1.1rem;
   font-weight: 600;
@@ -454,11 +511,6 @@ button {
   align-items: center;
 }
 
-.video-upload {
-  display: inline;
-  z-index: 100;
-}
-
 .buttonrow {
   display: flex;
   flex-wrap: wrap;
@@ -476,16 +528,10 @@ button {
   font-size: 1rem;
   border-radius: 2rem;
 }
-.video-upload {
-  opacity: 1;
-  transition: all 0.3s ease;
-  transform: translateY(10px);
-  display: block;
-}
 
 ::-webkit-scrollbar {
-  width: 15px;
-  height: 15px;
+  width: 10px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -521,6 +567,7 @@ button {
   0% {
     transform: rotate(0deg)
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -547,7 +594,7 @@ button {
   background-color: rgba(29, 30, 39, 0.7);
 }
 
-.video-upload p:hover {
+.video-upload button:hover {
   color: var(--main-color);
   background: var(--active);
   transform: translateY(-4px);
@@ -592,11 +639,9 @@ h3 {
 
 .name-for-video button {
   color: var(--main-color);
-  background: linear-gradient(
-    90deg,
-    var(--main-color) 50%,
-    var(--main-backgroundColor) 50%
-  );
+  background: linear-gradient(90deg,
+      var(--main-color) 50%,
+      var(--main-backgroundColor) 50%);
   background-size: 200% 100%;
   background-position: right bottom;
   transition: all 0.4s ease-in-out;
@@ -614,16 +659,20 @@ h3 {
     transform: scale(1);
     opacity: 1;
   }
+
   30% {
     opacity: 0.8;
   }
+
   50% {
     transform: scale(1.1);
     opacity: 1;
   }
+
   70% {
     opacity: 0.8;
   }
+
   100% {
     transform: scale(1);
     opacity: 0.8;
@@ -631,6 +680,7 @@ h3 {
 }
 
 @-webkit-keyframes flash {
+
   from,
   50%,
   to {
@@ -644,6 +694,7 @@ h3 {
 }
 
 @keyframes flash {
+
   from,
   50%,
   to {
@@ -666,7 +717,8 @@ h3 {
   }
 
   .header-text-content button {
-    transform: translate(22px, -3rem) !important;
+    display: flex;
+    flex-direction: column;
   }
 
   .name-for-video {
@@ -710,6 +762,26 @@ h3 {
 
   .header-text-content button {
     transform: translate(-11px, -2rem) !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .video-upload {
+    max-width: 90vw;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0.5rem 0.2rem !important;
+    border-radius: 1.2rem !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .video-upload {
+    max-width: 98vw;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 0.7rem !important;
+    padding: 0.3rem 0.1rem !important;
   }
 }
 
@@ -757,3 +829,186 @@ h3 {
     transition: 0.4s all ease-in-out;
   }
 }
+
+@media (max-width: 900px) {
+  .webcam-container {
+    max-width: 95vw;
+    height: 340px;
+    min-width: 0;
+    margin: 2rem 0.5rem;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (max-width: 750px) {
+  .webcam-container {
+    max-width: 95vw;
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    position: relative;
+    transform: none;
+    left: auto;
+    top: 20%;
+  }
+
+  .video-upload {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    margin-top: 1rem;
+    max-width: 300px;
+    text-align: center;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .webcam-container {
+    max-width: 95vw;
+    height: auto;
+    border-radius: 12px;
+    margin: 1rem auto;
+    left: 50%;
+    top: 50%;
+    transform: translate(-55%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .video-upload {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 550x) {
+  .webcam-container {
+    max-width: 100vw;
+    height: 140px;
+    border-radius: 8px;
+    margin: 0.5rem 0.1rem;
+    left: 50%;
+    top: 50%;
+    transform: translate(-75%, -50%);
+    margin-right: 4rem !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .webcam-container {
+    max-width: 100vw;
+    height: 140px;
+    border-radius: 8px;
+    margin: 0.5rem 0.1rem;
+    left: 50%;
+    top: 50%;
+    transform: translate(-40%, -50%);
+  }
+}
+
+@media(max-width: 800px) {
+  #heatmapImage {
+    max-width: 100%;
+    height: 500px;
+    text-align: center;
+    margin: 0 auto;
+  }
+}
+
+#heatmapModal .modal-footer {
+  padding: 1.5rem;
+  background: rgba(29, 30, 39, 0.8);
+  border-top: 1px solid rgba(232, 22, 46, 0.3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+#heatmapModal .modal-footer .btn {
+  color: #fff;
+  min-width: 140px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  font-size: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+#heatmapModal .modal-footer .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 650px) {
+  #heatmapModal .modal-footer {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  #heatmapModal .modal-footer .btn {
+    width: 50%;
+  }
+}
+
+#heatmapUpload {
+  width: 100%;
+  max-width: 700px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 2px solid #3498db;
+  color: #2980b9;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: #ecf0f1;
+  font-size: 1.12em;
+  font-family: 'Wix Madefor Display', sans-serif;
+  font-weight: 500;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.15);
+  margin: 0 auto;
+  display: block;
+}
+
+#heatmapUpload:hover,
+#heatmapUpload:focus {
+  border-color: #2980b9;
+  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.25);
+  outline: none;
+}
+
+@media (max-width: 750px) {
+  #heatmapUpload {
+    max-width: 500px;
+    font-size: 15px;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  #heatmapUpload {
+    font-size: 15px;
+    padding: 10px 12px;
+  }
+}
+

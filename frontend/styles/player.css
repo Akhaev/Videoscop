@@ -2,7 +2,7 @@ body,
 html {
   width: 100%;
   height: 100vh;
-  overflow: hidden;
+  overflow: auto;
   font-family: 'Wix Madefor Display', sans-serif;
   color: rgba(0, 0, 0, 0.8);
   background-color: var(--main-backgroundColor);
@@ -92,6 +92,7 @@ header,
   cursor: pointer;
   margin-bottom: -4.2rem;
   z-index: 999;
+  transform: translateY(-100%) !important;
 }
 
 .search input {
@@ -99,7 +100,7 @@ header,
   color: #fff;
   background-color: #262934 !important;
   font-size: 1.1rem;
-  margin: 6rem auto 0rem auto;
+  margin: 1rem auto 0rem auto;
   padding: 1.2rem 4rem 1.2rem 1.5rem;
   width: 65vw;
   border: none;
@@ -247,10 +248,14 @@ video {
 }
 
 .player-container {
-  text-align: center;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  margin: -2rem auto !important;
+  text-align: center;
+
+  position: relative;
+  top: -8rem; /* поднимает вверх */
+  transition: top 0.3s ease;
 }
 
 .controls {
@@ -261,8 +266,9 @@ video {
 
 .remove-sidebar {
   all: unset;
-  width: 35px;
-  height: 36px;
+  width: 65px;
+  height: 50px;
+  transform: scale(1.5) translateX(10px);
   cursor: pointer;
 }
 
