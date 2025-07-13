@@ -357,13 +357,39 @@
   </script>
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
-      const target = document.getElementById('target');
       const hideEyeCheckbox = document.getElementById('hide-eye-checkbox');
-      const updateEyeVisibility = () => {
-        if (target) target.style.opacity = hideEyeCheckbox.checked ? '0' : '1';
-      };
-      hideEyeCheckbox.addEventListener('change', updateEyeVisibility);
-      updateEyeVisibility();
+
+      // Простая функция для ожидания элемента
+      function waitForGazeDot(callback) {
+        const checkElement = () => {
+          const gazeDot = document.getElementById('webgazerGazeDot');
+          if (gazeDot) {
+            callback(gazeDot);
+          } else {
+            setTimeout(checkElement, 100);
+          }
+        };
+        checkElement();
+      }
+
+      // Ждем появления gaze dot и настраиваем управление
+      waitForGazeDot((gazeDot) => {
+        console.log('Gaze dot found!');
+
+        const updateEyeVisibility = () => {
+          gazeDot.style.opacity = hideEyeCheckbox.checked ? '0' : '1';
+        };
+
+        hideEyeCheckbox.addEventListener('change', updateEyeVisibility);
+        updateEyeVisibility();
+      });
+
+
+      // const calibration = document.querySelector(".Calibration")
+      // const plottingCanvas = document.getElementById("plotting_canvas")
+      // if (calibration.style.display === "none") {
+      //   plottingCanvas.style.display = "none"
+      // }
       document.getElementById('player').addEventListener('click', () => {
         window.location.href = 'player.html';
       });

@@ -78,6 +78,7 @@ li {
     border-color: black;
     border-style: solid;
     position:fixed;
+    z-index: 9999;
 }
 
 /* Calibration point position */

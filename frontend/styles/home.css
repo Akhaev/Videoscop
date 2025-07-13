@@ -374,6 +374,9 @@ button {
   border-radius: 2.4rem !important;
   width: 120%;
   margin-bottom: 1rem !important;
+  position: relative !important;
+  z-index: 99999 !important;
+  pointer-events: auto !important;
 }
 
 #overlay {
@@ -406,8 +409,11 @@ button {
   font-weight: 600;
   color: #3b3c3f;
   transition: all 0.3s ease;
-  cursor: pointer;
+  cursor: pointer !important;
   text-align: center;
+  position: relative !important;
+  z-index: 99998 !important;
+  pointer-events: auto !important;
 }
 
 .video-upload p {
@@ -1012,3 +1018,12 @@ h3 {
   }
 }
 
+/* Стили для контейнера калибровки */
+.calibrationDiv {
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.calibrationDiv .Calibration {
+  pointer-events: auto;
+}
