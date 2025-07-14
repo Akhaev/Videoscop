@@ -81,14 +81,14 @@
     }
 
     #heatmapImage,
-#heatmapVideo {
-  width: 100%;
-  max-width: 1000px;  
-  height: 600px;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
-}
+    #heatmapVideo {
+      width: 100%;
+      max-width: 1000px;
+      height: 600px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
 
     #heatmapVideo {
       display: none;
@@ -201,6 +201,19 @@
 
     .sidebar-footer {
       transform: translateX(-45px);
+    }
+
+    .heatmap-container {
+      width: 1100px;
+      /* увеличьте ширину */
+      height: 700px;
+      /* увеличьте высоту */
+      padding: 30px 0 0 0;
+      /* отступ сверху, если нужно */
+      margin: 0 auto;
+      /* центрирование по горизонтали */
+      box-sizing: border-box;
+      /* другие стили */
     }
   </style>
   <script src="www/webgazer.js"></script>
