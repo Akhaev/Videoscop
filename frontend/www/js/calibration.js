@@ -79,18 +79,6 @@ function calPointClick(node) {
     if (canvas) {
       canvas.style.display = "none";
     }
-    if (window.webgazer && typeof webgazer.showPredictionPoints === 'function') {
-      webgazer.showPredictionPoints(false);
-    }
-    function hideGazeDot() {
-      var gazeDot = document.getElementById('webgazerGazeDot');
-      if (gazeDot) {
-        gazeDot.style.display = "none";
-      } else {
-        setTimeout(hideGazeDot, 100);
-      }
-    }
-    hideGazeDot();
     var webcamContainer = document.querySelector('.webcam-container');
     if (webcamContainer) {
       webcamContainer.style.display = 'flex';
