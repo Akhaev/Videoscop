@@ -622,7 +622,7 @@ button {
   top: 35%;
   left: 45%;
   transform: translate(-50%, -50%);
-  z-index: 10000;
+  z-index: 10000000 !important;
   background-color: rgba(255, 255, 255, 0.4);
   border-radius: 1rem;
   padding: 1.7rem;

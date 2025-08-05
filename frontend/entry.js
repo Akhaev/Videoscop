@@ -4,26 +4,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const recording = document.querySelector('#recording');
   const pauseIcon = document.querySelector('.pause-icon');
   const letterO = document.getElementById('letter-o');
-  const startRecordingButton = document.querySelector('.start-recording');
-  const pauseRecordingButton = document.getElementById('stop-recording');
-  const finishRecordingButton = document.getElementById('finish-recording');
-  const recordingButton = document.getElementById('recording-button');
   const nameVideo = document.querySelector('.name-for-video');
+  const plottingCanvas = document.getElementById("plotting_canvas")
   const main = document.querySelector('.main');
   const videoNameInp = document.getElementById('video-name-input');
   const addVideoBtn = document.querySelector('#add-video');
   const loading = document.querySelector('.loading')
   const header = document.querySelector('header')
-
+  const heatmapVideo = document.querySelector("#heatmapVideo")
+  const heatmapImage = document.querySelector("#heatmapImage")
+  const webgazerGazeDot = document.getElementById("webgazerGazeDot")
+  const modalFade = document.querySelector(".modal")
   let mediaRecorder;
+
   let recordedChunks = [];
   let isRecording = false;
   let isPaused = false;
   let startTime;
   let videoBlob = null;
 
-  nameVideo.style.display = 'none';
-  main.style.opacity = '1';
+  // Функция для восстановления canvas
+  const restoreCanvas = () => {
+    const existingCanvas = document.getElementById('plotting_canvas');
+    if (!existingCanvas) {
+      const canvas = document.createElement('canvas');
+      canvas.id = 'plotting_canvas';
+      canvas.width = 500;
+      canvas.height = 500;
+      canvas.style.cursor = 'crosshair';
+
+      // Вставляем canvas перед nav элементом
+      const nav = document.getElementById('webgazerNavbar');
+      if (nav) {
+        nav.parentNode.insertBefore(canvas, nav);
+      } else {
+        // Если nav не найден, вставляем в конец body
+        document.body.appendChild(canvas);
+      }
+
+      // Обновляем глобальную переменную
+      plottingCanvas = canvas;
+    }
+  };
+
+
 
   const startRecording = async () => {
     try {
@@ -48,8 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         nameVideo.style.display = 'block';
         main.style.opacity = '.1';
-
-        stream.getTracks().forEach((track) => track.stop());
+        // main.style.pointerEvents = 'none'; // УДАЛЕНО
       };
 
       mediaRecorder.start(100);
@@ -61,52 +84,69 @@ document.addEventListener('DOMContentLoaded', () => {
         letterO.style.display = 'none';
         recording.style.display = 'inline-block';
       }, 2000);
-
-      pauseRecordingButton.disabled = false;
-      finishRecordingButton.disabled = false;
-      startRecordingButton.disabled = true;
     } catch (error) {
       console.error('Ошибка в startRecording:', error);
-      pauseRecordingButton.disabled = true;
-      finishRecordingButton.disabled = true;
-      startRecordingButton.disabled = false;
     }
   };
 
-  startRecordingButton.addEventListener('click', startRecording);
 
-  pauseRecordingButton.addEventListener('click', () => {
-    if (mediaRecorder && isRecording) {
-      if (isPaused) {
-        mediaRecorder.resume();
-        recording.style.display = 'inline-block';
-        pauseIcon.style.display = 'none';
-      } else {
-        mediaRecorder.pause();
-        recording.style.display = 'none';
-        pauseIcon.style.display = 'inline-block';
+
+  const videoUploader = document.getElementById('heatmapUpload');
+  let selectedVideoFile = null;
+
+  videoUploader.addEventListener('change', (event) => {
+    if (sessionStorage.getItem('video_uploaded') === 'true') {
+      alert('Вы уже загрузили видео в этой сессии!');
+      videoUploader.value = '';
+      nameVideo.style.display = 'none';
+      main.style.opacity = '1';
+      // main.style.pointerEvents = 'auto'; // УДАЛЕНО
+      // Восстанавливаем pointer-events для canvas
+      const canvas = document.getElementById('plotting_canvas');
+      if (canvas) canvas.style.pointerEvents = 'auto';
+      return;
+    }
+    const file = event.target.files[0];
+    if (file) {
+      selectedVideoFile = file;
+      nameVideo.style.display = 'block'; // Показываем блок для названия
+      main.style.opacity = '.1';
+      webgazerGazeDot.style.opacity = "0";
+      modalFade.style.display = "none"
+
+      // Полностью удаляем canvas из DOM чтобы он не блокировал input
+      const canvas = document.getElementById('plotting_canvas');
+      if (canvas) {
+        canvas.remove();
       }
-      isPaused = !isPaused;
+
+      // Фокусируемся на input после небольшой задержки
+      setTimeout(() => {
+        videoNameInp.focus();
+      }, 100);
+    } else {
+      selectedVideoFile = null;
+      nameVideo.style.display = 'none';
+      main.style.opacity = '1';
+      modalFade.style.display = "block"
+      // Восстанавливаем canvas
+      restoreCanvas();
     }
+
   });
-
-  finishRecordingButton.addEventListener('click', () => {
-    if (mediaRecorder && isRecording) {
-      mediaRecorder.stop();
-      isRecording = false;
-      isPaused = false;
-
-      letterO.style.display = 'block';
-      recording.style.display = 'none';
-      pauseIcon.style.display = 'none';
-
-      startRecordingButton.disabled = false;
-      pauseRecordingButton.disabled = true;
-      finishRecordingButton.disabled = true;
-    }
-  });
-
   addVideoBtn.addEventListener('click', async () => {
+    nameVideo.style.display = 'none';
+    modalFade.style.display = "block"
+    webgazerGazeDot.style.opacity = "1";
+    main.style.opacity = '1';
+
+    // Восстанавливаем canvas после загрузки
+    restoreCanvas();
+
+    if (sessionStorage.getItem('video_uploaded') === 'true') {
+      alert('Вы уже загрузили видео в этой сессии!');
+      return; // Гарантированный выход до любых сетевых запросов
+    }
     const videoName = videoNameInp.value.trim();
 
     if (!videoName || videoName.length < 3) {
@@ -114,93 +154,81 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (!videoBlob) {
-      alert('No recording available to upload');
+    if (!selectedVideoFile) {
+      alert('No video file selected');
       return;
     }
 
     try {
-      console.log('Preparing to upload video...');
 
-      const reader = new FileReader();
+      console.log('Preparing to upload video metadata...');
+      const durationSeconds = Math.floor(selectedVideoFile.duration || 0); // duration может быть не определён
+      const sizeMB = Math.round(selectedVideoFile.size / (1024 * 1024));
 
-      reader.onloadend = async () => {
-        const base64data = reader.result.split(',')[1];
-        const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
-        const sizeMB = Math.round(videoBlob.size / (1024 * 1024));
-
-        const payload = {
-          name: videoName,
-          length_seconds: Math.min(durationSeconds, 3600),
-          size: Math.max(1, Math.min(sizeMB, 1000)),
-          video_base64: base64data,
-        };
-
-        
-        const response = await fetch('http://217.114.10.197:8000/users/me/videos', { 
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('videoscop_token') || sessionStorage.getItem('videoscop_token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        }).then(loading.style.display = 'block', main.style.opacity = '.2', header.style.opacity = '.2');
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || data.detail || `Failed to upload video metadata: ${response.status}`);
-        }
-
-        const result = data;
-        localStorage.setItem('video', JSON.stringify(result));
-
-        const uploadUrl = result.upload_link;
-
-        if (!uploadUrl || typeof uploadUrl !== 'string') {
-          throw new Error('No valid upload URL provided in response');
-        }
-
-        console.log('Uploading video to:', uploadUrl);
-        const uploadResponse = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'video/webm',
-          },
-          body: videoBlob,
-        }).then(loading.style.display = 'none', main.style.opacity = '1', header.style.opacity = '1');
-
-        const responseText = await uploadResponse.text();
-
-        if (!uploadResponse.ok) {
-          throw new Error(`Failed to upload video to storage: ${responseText}`);
-        }
-
-        nameVideo.style.display = 'none';
-        main.style.opacity = '1';
-        videoNameInp.value = '';
-        videoBlob = null;
+      const payload = {
+        name: videoName,
+        length_seconds: Math.min(durationSeconds, 3600),
+        size: Math.max(1, Math.min(sizeMB, 1000)),
       };
 
-      reader.onerror = () => {
-        throw new Error('Failed to read video file');
-      };
+      const response = await fetch('http://217.114.10.197:8000/users/me/videos', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('videoscop_token') || sessionStorage.getItem('videoscop_token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-      reader.readAsDataURL(videoBlob);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.detail || `Failed to upload video metadata: ${response.status}`);
+      }
+
+      const uploadUrl = data.upload_link;
+      if (!uploadUrl || typeof uploadUrl !== 'string') {
+        throw new Error('No valid upload URL provided in response');
+      }
+
+      console.log('Uploading video to:', uploadUrl);
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': selectedVideoFile.type || 'video/webm',
+        },
+        body: selectedVideoFile,
+      });
+
+      const responseText = await uploadResponse.text();
+      if (!uploadResponse.ok) {
+        throw new Error(`Failed to upload video to storage: ${responseText}`);
+      }
+
+      nameVideo.style.display = 'none';
+      main.style.opacity = '1';
+      videoNameInp.value = '';
+      selectedVideoFile = null;
+      videoUploader.value = '';
+      sessionStorage.setItem('video_uploaded', 'true');
+
+      // Восстанавливаем canvas полностью
+      restoreCanvas();
+
+      alert('Видео успешно загружено!');
     } catch (error) {
       console.error('Error uploading video:', error);
       alert(`Upload failed: ${error.message}`);
     }
-
-    nameVideo.style.display = 'none';
-    main.style.opacity = '1';
   });
 
   videoNameInp.addEventListener('input', () => {
     addVideoBtn.disabled = !videoNameInp.value.trim();
   });
-  addVideoBtn.disabled = true;
+
+  
 });
+
 
 
 
