@@ -247,6 +247,9 @@
       </button>
     </div>
   </header>
+
+  <div class="loading" style="display: none;"></div>
+
   <div class="sidebar">
     <button class="remove-sidebar">
       <svg class="custom-icon" viewBox="0 0 477.175 477.175">
@@ -352,11 +355,6 @@
     </div>
   </div>
 </div>
-<div class="name-for-video" style="display: none;">
-  <h3>VIDEO TITLE</h3>
-  <input type="text" placeholder="VIDEO NAME" id="video-name-input" minlength="3" maxlength="50" required />
-  <button id="add-video">ADD</button>
-</div>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert/dist/sweetalert.min.js"></script>
   <script src="www/js/main.js"></script>
   <script src="entry.js"></script>
@@ -397,7 +395,6 @@
         checkElement();
       }
 
-      // Ждем появления gaze dot и настраиваем управление
       waitForGazeDot((gazeDot) => {
         console.log('Gaze dot found!');
 
@@ -409,18 +406,16 @@
         updateEyeVisibility();
       });
 
-
-      // const calibration = document.querySelector(".Calibration")
-      // const plottingCanvas = document.getElementById("plotting_canvas")
-      // if (calibration.style.display === "none") {
-      //   plottingCanvas.style.display = "none"
-      // }
       document.getElementById('player').addEventListener('click', () => {
         window.location.href = 'player.html';
       });
       const sidebar = document.querySelector('.sidebar');
       const settingsBtn = document.getElementById('settings-btn');
       const removeSidebarBtn = document.querySelector('.remove-sidebar');
+
+      const exitBtn = document.getElementById("exit").addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
 
       settingsBtn.addEventListener('click', () => {
         sidebar.classList.toggle('open');
@@ -431,9 +426,11 @@
         sidebar.classList.remove('open');
         document.body.classList.remove('sidebar-open');
       });
+      removeSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+      });
+      
     });
   </script>
-
 </body>
-
 </html>
